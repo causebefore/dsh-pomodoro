@@ -32,6 +32,13 @@ dsh --profile web --dump-config | findstr dsh-pomodoro
 
 JavaScript 使用 ESM、两空格缩进、双引号、分号和多行尾逗号；变量/函数用 `camelCase`，常量用 `UPPER_SNAKE_CASE`，插件与 namespace 用 kebab-case。注释延续中文契约说明。组件颜色只消费 `--dsw-alias-*`，共享阴影与排版使用宿主 token；新增动画必须保留 `prefers-reduced-motion`，交互控件必须有可见的 `:focus-visible`。
 
+## 分支策略
+
+- `dev` 是默认开发分支。功能、修复、重构、文档等日常修改必须在 `dev` 或从 `dev` 创建的主题分支上进行，PR 默认合入 `dev`。
+- 开始修改前先检查当前分支；如果位于 `main`，应在工作区干净时切换到 `dev`，不得把日常开发提交直接留在 `main`。
+- `main` 只负责发布。只有完成发布检查、准备正式发布时，才允许通过发布 PR 将 `dev` 合入 `main`。
+- 除非用户明确授权执行发布，代理不得直接提交或推送 `main`；发布完成后继续回到 `dev` 开发。
+
 ## 提交、PR 与发布
 
 提交采用 Conventional Commit，例如 `fix: 修正阶段提示消失时机`。每个提交只处理一个关注点。PR 需列出验证命令与手测场景；UI 变化附明暗主题截图，peer 或 DSH 契约变化单独说明。发布前核对 README、版本、许可证、`npm pack` 文件清单和干净工作区。除非用户明确授权，代理不得执行真实 `npm publish`。不要提交凭据、`settings.yaml`、日志或 `.tgz`。
