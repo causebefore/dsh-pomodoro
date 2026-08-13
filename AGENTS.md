@@ -9,7 +9,7 @@
 - `lib/index.js` 是 Node/Cordis 入口，拥有生产默认值、可选 settings namespace 和仅限 loopback 的 `/pomodoro` RPC。
 - `lib/client.js` 是直接分发的浏览器 bundle，包含计时引擎、React UI、slot 注册和设置同步；保留 `window.__ModuleLoader__.load(...)` 外壳。
 - `cordis.patch.yml` 只插入 `ui-pomodoro` 组合行，不复制默认值。
-- `debug.html` 与 `vendor/` 组成离线调试台；vendor 仅在有明确依赖升级时修改。
+- 维护者本地且被 Git 忽略的 `debug.html` 与 `vendor/` 组成离线调试台；vendor 仅在有明确依赖升级时修改。
 - `package.json` 是 exports、peer 范围、bundle patch 和 npm 发布清单的权威来源。
 
 ## 参考文档与架构约束
@@ -20,13 +20,12 @@
 
 ```powershell
 npm run check
-Start-Process .\debug.html
 npm pack --dry-run
 npm publish --dry-run
 dsh --profile web --dump-config | findstr dsh-pomodoro
 ```
 
-项目没有生成步骤；`lib/client.js` 就是发布产物。调试台使用 `?fast=1` 验证完整阶段切换，使用 `?fast=1&no-settings=1` 验证只读降级。设置或样式变更还要检查保存/清除、明暗主题、键盘焦点、减少动态效果和面板拖动。
+项目没有生成步骤；`lib/client.js` 就是发布产物。维护者本地调试台使用 `?fast=1` 验证完整阶段切换，使用 `?fast=1&no-settings=1` 验证只读降级。设置或样式变更还要检查保存/清除、明暗主题、键盘焦点、减少动态效果和面板拖动。
 
 ## 编码与样式约定
 
