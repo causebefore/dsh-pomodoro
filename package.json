@@ -1,9 +1,22 @@
 {
   "name": "dsh-pomodoro",
-  "description": "番茄钟面板：25 分钟专注 / 5 分钟休息，侧栏开关 + 可拖动浮动面板，阶段切换面板内视觉提示",
+  "description": "DeepSeek Harness Web 番茄钟插件：可配置专注与休息时长，提供侧栏入口和可拖动浮动面板",
   "version": "1.0.0",
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "pomodoro",
+    "productivity",
+    "timer"
+  ],
   "type": "module",
   "main": "lib/index.js",
+  "scripts": {
+    "check": "node --check lib/index.js && node --check lib/client.js",
+    "prepublishOnly": "npm run check"
+  },
   "exports": {
     ".": {
       "default": "./lib/index.js"
@@ -30,6 +43,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
   "peerDependencies": {
     "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.6",
     "@deepseek-ai/cordis": "^4.0.1",
@@ -37,13 +56,13 @@
     "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-settings": "^0.1.0-rc.6",
-    "@deepseek-ai/schemastery": "^3.18.1",
     "react": "^18.2.0"
   },
   "files": [
     "lib/index.js",
     "lib/client.js",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "license": "MIT"
 }

@@ -1,39 +1,37 @@
 # Repository Guidelines
 
-## 项目结构与模块职责
+## 项目定位
 
-- `lib/index.js` 是 Node/Cordis 入口，定义唯一的生产默认值、可选 settings namespace，以及仅限 loopback 的 `/pomodoro` RPC。
-- `lib/client.js` 是浏览器端手写 bundle，包含计时引擎、React UI、slot 注册和设置同步。修改时保留 `window.__ModuleLoader__.load(...)` 外壳。
-- `cordis.patch.yml` 只负责插入 `ui-pomodoro` 组合行；不要在这里重复默认值。
-- `debug.html` 是离线调试台，`vendor/` 存放其固定版本的 React UMD 文件。除依赖升级外，不要编辑压缩后的 vendor 文件。
-- `package.json` 是 exports、客户端依赖边、bundle patch 和发布文件清单的权威来源。
+本项目是 **DeepSeek Harness（DSH）** 的番茄钟功能插件，发布名称为dsh-pomodoro，为 DSH 提供专注计时、休息阶段切换及相关设置能力。开发、调试、兼容性判断与发布均以 DSH 插件契约为边界，不按独立 Web 应用处理。
+
+## 项目结构与职责
+
+- `lib/index.js` 是 Node/Cordis 入口，拥有生产默认值、可选 settings namespace 和仅限 loopback 的 `/pomodoro` RPC。
+- `lib/client.js` 是直接分发的浏览器 bundle，包含计时引擎、React UI、slot 注册和设置同步；保留 `window.__ModuleLoader__.load(...)` 外壳。
+- `cordis.patch.yml` 只插入 `ui-pomodoro` 组合行，不复制默认值。
+- `debug.html` 与 `vendor/` 组成离线调试台；vendor 仅在有明确依赖升级时修改。
+- `package.json` 是 exports、peer 范围、bundle patch 和 npm 发布清单的权威来源。
 
 ## 参考文档与架构约束
 
-DSH API 或集成方式不确定时，先查阅 `C:\Users\lbq08\Desktop\deepseek-harness\docs`。本项目重点参考 `subsystems/client-modules.zh.md`、`subsystems/settings.zh.md`、`web-styling.zh.md` 和 `user/develop/basic/publish.zh.md`。保持配置链路为 `Config schema → settings.yaml 用户覆盖 → /pomodoro RPC → 客户端引擎`；settings 服务缺席时必须保留只读降级能力。
+本机参考文档位于 `C:\Users\lbq08\Desktop\deepseek-harness\docs`，合规参照范围限定在 `user/develop/` 目录：发布与安装以 `user/develop/basic/publish.zh.md` 为准，插件配置参考 `user/develop/basic/config.zh.md`，Cordis 服务与事件用法参考 `user/develop/framework/。
 
-## 开发、检查与本地运行
-
-项目没有生成步骤，也未声明 npm test/lint 脚本；`lib/client.js` 本身就是分发产物。
+## 开发与验证命令
 
 ```powershell
-node --check .\lib\index.js
-node --check .\lib\client.js
+npm run check
 Start-Process .\debug.html
 npm pack --dry-run
+npm publish --dry-run
 dsh --profile web --dump-config | findstr dsh-pomodoro
 ```
 
-前两项检查语法；调试台验证 UI；`npm pack --dry-run` 核对实际发布内容；最后一项确认插件已进入 web profile。需要联调时，用 `dsh plugin --profile web add "link:$PWD"` 建立链接，修改后重启 `dsh web`。
+项目没有生成步骤；`lib/client.js` 就是发布产物。调试台使用 `?fast=1` 验证完整阶段切换，使用 `?fast=1&no-settings=1` 验证只读降级。设置或样式变更还要检查保存/清除、明暗主题、键盘焦点、减少动态效果和面板拖动。
 
-## 编码风格与命名
+## 编码与样式约定
 
-JavaScript 使用 ESM、两空格缩进、双引号、分号和多行尾逗号；优先 `const`。变量和函数用 `camelCase`，常量用 `UPPER_SNAKE_CASE`，插件、slot 和 namespace 使用小写 kebab-case 或现有点分 ID。注释延续中文风格，只解释契约和非显然行为。组件颜色优先使用 `--dsw-alias-*` 主题令牌。
+JavaScript 使用 ESM、两空格缩进、双引号、分号和多行尾逗号；变量/函数用 `camelCase`，常量用 `UPPER_SNAKE_CASE`，插件与 namespace 用 kebab-case。注释延续中文契约说明。组件颜色只消费 `--dsw-alias-*`，共享阴影与排版使用宿主 token；新增动画必须保留 `prefers-reduced-motion`，交互控件必须有可见的 `:focus-visible`。
 
-## 测试要求
+## 提交、PR 与发布
 
-当前没有自动化测试框架或覆盖率门槛。每次修改至少运行两项语法检查，并用 `debug.html?fast=1` 验证开始、暂停、重置、跳过和阶段切换；用 `?fast=1&no-settings=1` 验证降级路径。设置或样式变更还需检查保存/清除、明暗主题和面板拖动。
-
-## 提交与 Pull Request
-
-当前目录不含 Git 元数据，无法验证既有提交格式。新增历史统一采用简短的 Conventional Commit，例如 `feat: 支持自定义休息时长` 或 `fix: 修正暂停后的剩余时间`。一个提交只处理一个关注点。PR 应说明行为及配置链路变化、列出实际验证命令与手测场景、关联 issue；UI 变化附明暗主题截图，依赖范围或 DSH 契约变化需单独标明。不要提交 `settings.yaml`、凭据或本地打包生成的 `.tgz`。
+提交采用 Conventional Commit，例如 `fix: 修正阶段提示消失时机`。每个提交只处理一个关注点。PR 需列出验证命令与手测场景；UI 变化附明暗主题截图，peer 或 DSH 契约变化单独说明。发布前核对 README、版本、许可证、`npm pack` 文件清单和干净工作区。除非用户明确授权，代理不得执行真实 `npm publish`。不要提交凭据、`settings.yaml`、日志或 `.tgz`。

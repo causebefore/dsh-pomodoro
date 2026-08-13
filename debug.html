@@ -3,28 +3,52 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
 <title>dsh-pomodoro · 独立调试台（无需 DSH）</title>
 <style>
   /* 模拟 DSH 主题令牌：与 --dsw-alias-* 同名，
      插件 CSS 里的 var() 直接消费，从而在无 DSH 环境下复现明暗主题适配。 */
   :root {
     --dsw-alias-bg-base: #ffffff;
+    --dsw-alias-bg-overlay: #ffffff;
     --dsw-alias-label-primary: #1f2328;
+    --dsw-alias-label-primary-foreground: #ffffff;
     --dsw-alias-label-secondary: #4a5560;
     --dsw-alias-label-tertiary: #8a94a0;
     --dsw-alias-border-l1: rgba(31, 35, 40, 0.14);
     --dsw-alias-border-l2: rgba(31, 35, 40, 0.24);
     --dsw-alias-interactive-bg-hover: rgba(31, 35, 40, 0.08);
+    --dsw-alias-state-business-primary: #4d6bfe;
+    --dsw-alias-state-business-tertiary: #eef1ff;
+    --dsw-alias-state-error-primary: #d92d20;
+    --dsw-alias-state-success-primary: #2f9e44;
+    --dsw-alias-button-primary-fill: #4d6bfe;
+    --dsw-alias-button-primary-hover: #3f5be0;
+    --dsw-shadow-lv3: 0 8px 24px rgba(31, 35, 40, 0.16);
+    --dsw-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --dsw-font-xs-13: 400 13px/18px var(--dsw-font-family);
+    --dsw-font-xs-strong-13: 600 13px/18px var(--dsw-font-family);
+    --dsw-font-xxs-12: 400 12px/16px var(--dsw-font-family);
+    --dsw-font-xxs-strong-12: 600 12px/16px var(--dsw-font-family);
     --dsw-specific-tip: #fff7ed;
   }
   html[data-theme="dark"] {
     --dsw-alias-bg-base: #1c2026;
+    --dsw-alias-bg-overlay: #303640;
     --dsw-alias-label-primary: #e8e8e8;
+    --dsw-alias-label-primary-foreground: #ffffff;
     --dsw-alias-label-secondary: #b8bec6;
     --dsw-alias-label-tertiary: #7d8791;
     --dsw-alias-border-l1: rgba(232, 232, 232, 0.14);
     --dsw-alias-border-l2: rgba(232, 232, 232, 0.24);
     --dsw-alias-interactive-bg-hover: rgba(232, 232, 232, 0.1);
+    --dsw-alias-state-business-primary: #8ea2ff;
+    --dsw-alias-state-business-tertiary: #28335f;
+    --dsw-alias-state-error-primary: #ff8a80;
+    --dsw-alias-state-success-primary: #51cf66;
+    --dsw-alias-button-primary-fill: #4d6bfe;
+    --dsw-alias-button-primary-hover: #657ef8;
+    --dsw-shadow-lv3: 0 8px 24px rgba(0, 0, 0, 0.36);
     --dsw-specific-tip: #2a2118;
   }
   body {
@@ -180,10 +204,6 @@
   let fakeRevision = 1;
   const fakeSettingsView = () => {
     const value = { ...fakeBase, ...fakeUser };
-    if (fast) {
-      value.focusMs = 8000;
-      value.breakMs = 4000;
-    }
     return { value, user: fakeUser, revision: fakeRevision, writable: !noSettings };
   };
   const fakeConnection = {
@@ -192,7 +212,7 @@
       call: async (channel, endpoint, payload = {}) => {
         log("connection.rpc.call → " + channel + "/" + endpoint);
         if (channel !== "/pomodoro") return { ok: false, error: { message: "未知通道" } };
-        if (endpoint === "settings.read" || endpoint === "config") {
+        if (endpoint === "settings.read") {
           return { ok: true, value: fakeSettingsView() };
         }
         if (endpoint === "settings.save") {
