@@ -61,6 +61,7 @@ dsh plugin --profile web remove dsh-pomodoro
 - 计时进度和完成数量只保存在浏览器内存中；刷新页面或重启 DSH 后会重置。
 - 非 loopback 的远程浏览器仍可使用计时器，但使用内置默认值且不能写入持久化设置。
 - 当前不提供系统通知或提示音；阶段完成仅在面板内提示。
+- 当前界面文案与设置分节名称只提供简体中文，不随宿主 locale 切换。
 - 不要与使用 `pomodoro.toggle` / `pomodoro.panel` slot ID 的动态版番茄钟同时启用。
 
 ## 本地开发
@@ -72,6 +73,8 @@ npm pack --dry-run
 ```
 
 调试台支持 `debug.html?fast=1`（8 秒专注／4 秒休息）和 `?fast=1&no-settings=1`（无 settings 服务）。联调本地源码可运行 `dsh plugin --profile web add "link:$PWD"`，修改后重启 `dsh web`。
+
+项目没有构建步骤，`lib/client.js` 是直接发布的浏览器 bundle，因此组件样式由该 bundle 通过 `style[data-plugin]` 注入并由宿主模块系统接管。若以后引入构建链，应重新评估迁移到 CSS Modules。
 
 ## License
 
