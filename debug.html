@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dsh-pomodoro · 独立调试台（无需 DSH）</title>
+<style>
+  /* 模拟 DSH 主题令牌：与 --dsw-alias-* 同名，
+     插件 CSS 里的 var() 直接消费，从而在无 DSH 环境下复现明暗主题适配。 */
+  :root {
+    --dsw-alias-bg-base: #ffffff;
+    --dsw-alias-label-primary: #1f2328;
+    --dsw-alias-label-secondary: #4a5560;
+    --dsw-alias-label-tertiary: #8a94a0;
+    --dsw-alias-border-l1: rgba(31, 35, 40, 0.14);
+    --dsw-alias-border-l2: rgba(31, 35, 40, 0.24);
+    --dsw-alias-interactive-bg-hover: rgba(31, 35, 40, 0.08);
+    --dsw-specific-tip: #fff7ed;
+  }
+  html[data-theme="dark"] {
+    --dsw-alias-bg-base: #1c2026;
+    --dsw-alias-label-primary: #e8e8e8;
+    --dsw-alias-label-secondary: #b8bec6;
+    --dsw-alias-label-tertiary: #7d8791;
+    --dsw-alias-border-l1: rgba(232, 232, 232, 0.14);
+    --dsw-alias-border-l2: rgba(232, 232, 232, 0.24);
+    --dsw-alias-interactive-bg-hover: rgba(232, 232, 232, 0.1);
+    --dsw-specific-tip: #2a2118;
+  }
+  body {
+    margin: 0;
+    padding: 24px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    background: var(--dsw-alias-bg-base);
+    color: var(--dsw-alias-label-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    transition: background 0.2s;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: var(--dsw-alias-label-tertiary); font-size: 12px; margin-bottom: 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .bar a, .bar button {
+    border: 1px solid var(--dsw-alias-border-l2);
+    background: transparent;
+    color: var(--dsw-alias-label-primary);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .bar a:hover, .bar button:hover { background: var(--dsw-alias-interactive-bg-hover); }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+  .cell {
+    border: 1px dashed var(--dsw-alias-border-l1);
+    border-radius: 10px;
+    padding: 10px;
+    min-width: 160px;
+  }
+  .cell .label { font-size: 11px; color: var(--dsw-alias-label-tertiary); margin-bottom: 8px; }
+  .viewport {
+    position: relative;
+    height: 420px;
+    border: 1px dashed var(--dsw-alias-border-l1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .viewport .hint {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    font-size: 11px;
+    color: var(--dsw-alias-label-tertiary);
+    pointer-events: none;
+  }
+  pre.log {
+    background: var(--dsw-specific-tip);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 11px;
+    min-height: 60px;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+  <h1>🍅 dsh-pomodoro 调试台</h1>
+  <p class="sub">不依赖 DSH：伪造 __ModuleLoader__ / ctx / slots，直接运行 lib/client.js 本体。面板是 position:fixed，会浮在浏览器窗口右下角（下方视口只是示意）。</p>
+
+  <div class="bar">
+    <a href="?fast=1">⚡ 快速模式：专注 8s / 休息 4s</a>
+    <a href="?">🐢 真实时长：25min / 5min</a>
+    <a href="?fast=1&no-settings=1">🧩 无 settings 域降级</a>
+    <button onclick="toggleTheme()">🌓 切换明暗主题</button>
+  </div>
+
+  <div class="row">
+    <div class="cell">
+      <div class="label">sidebar.footer.action · wide=true（宽侧栏形态）</div>
+      <div id="toggle-wide"></div>
+    </div>
+    <div class="cell">
+      <div class="label">sidebar.footer.action · wide=false（窄栏形态）</div>
+      <div id="toggle-narrow"></div>
+    </div>
+  </div>
+
+  <div class="viewport">
+    <div class="hint">面板实际位置在窗口右下角（fixed 定位），拖动标题栏试试</div>
+    <div id="panel"></div>
+  </div>
+
+  <div class="cell" style="margin-top:16px">
+    <div class="label">settings.section（设置页；?no-settings=1 可验证无 settings 域降级）</div>
+    <div id="settings-section"></div>
+  </div>
+
+  <h2 style="font-size:13px;margin:16px 0 6px">接线日志</h2>
+  <pre class="log" id="log"></pre>
+
+<script>
+  // 测试时长：必须在加载 bundle 前设置
+  const fast = new URLSearchParams(location.search).get("fast") === "1";
+  window.__POMO_DEBUG_FOCUS_MS = fast ? 8000 : undefined;
+  window.__POMO_DEBUG_BREAK_MS = fast ? 4000 : undefined;
+
+  const logs = [];
+  function log(msg) {
+    logs.push(msg);
+    document.getElementById("log").textContent = logs.join("\n");
+  }
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+  }
+</script>
+
+<script src="./vendor/react.production.min.js"></script>
+<script src="./vendor/react-dom.production.min.js"></script>
+
+<script>
+  // DSH 客户端模块系统最小替身：只提供 react，其余模块一律报错
+  window.__ModuleLoader__ = {
+    load(entry) {
+      const require = (name) => {
+        if (name === "react") return window.React;
+        throw new Error("[调试台] bundle 请求了未提供的模块: " + name);
+      };
+      const exports = entry.factory(require);
+      window.__pomo = { id: entry.id, exports };
+      log("模块物化: " + entry.id);
+    },
+  };
+</script>
+
+<script src="./lib/client.js"></script>
+
+<script>
+  // —— 伪 ctx：模拟内核服务 ——
+  const renderers = {};
+  const fakeSlots = {
+    inject(key, cb) { log("slots.inject → " + key); return cb(); },
+    register(opts, render) {
+      log("slots.register → " + opts.name + " (id=" + opts.id + ", order=" + opts.order + ")");
+      renderers[opts.name] = render;
+    },
+  };
+  // 伪 connection 服务：模拟宿主 settings 域经 /pomodoro 通道送达浏览器半边。
+  const urlParams = new URLSearchParams(location.search);
+  const noSettings = urlParams.get("no-settings") === "1";
+  // 伪 settings 域：schema 默认值作为 base，内存态对象模拟用户分节。
+  const fakeBase = {
+    focusMinutes: 25,
+    breakMinutes: 5,
+    autoStartBreaks: true,
+    autoStartFocus: false,
+  };
+  let fakeUser = {};
+  let fakeRevision = 1;
+  const fakeSettingsView = () => {
+    const value = { ...fakeBase, ...fakeUser };
+    if (fast) {
+      value.focusMs = 8000;
+      value.breakMs = 4000;
+    }
+    return { value, user: fakeUser, revision: fakeRevision, writable: !noSettings };
+  };
+  const fakeConnection = {
+    isLoopback: true,
+    rpc: {
+      call: async (channel, endpoint, payload = {}) => {
+        log("connection.rpc.call → " + channel + "/" + endpoint);
+        if (channel !== "/pomodoro") return { ok: false, error: { message: "未知通道" } };
+        if (endpoint === "settings.read" || endpoint === "config") {
+          return { ok: true, value: fakeSettingsView() };
+        }
+        if (endpoint === "settings.save") {
+          if (noSettings) return { ok: false, error: { code: "settings-unavailable", message: "当前组合没有可用的 settings 域" } };
+          fakeUser = { ...fakeUser, ...payload };
+          fakeRevision += 1;
+          return { ok: true, value: fakeSettingsView() };
+        }
+        if (endpoint === "settings.reset") {
+          if (noSettings) return { ok: false, error: { code: "settings-unavailable", message: "当前组合没有可用的 settings 域" } };
+          fakeUser = {};
+          fakeRevision += 1;
+          return { ok: true, value: fakeSettingsView() };
+        }
+        return { ok: false, error: { message: "未知端点 " + endpoint } };
+      },
+    },
+  };
+  const fakeCtx = {
+    get(name) {
+      if (name === "slots") return fakeSlots;
+      if (name === "connection") return fakeConnection;
+      return undefined;
+    },
+    interval(cb, ms) { const t = setInterval(cb, ms); log("ctx.interval " + ms + "ms"); return () => clearInterval(t); },
+    timeout(cb, ms) { const t = setTimeout(cb, ms); return () => clearTimeout(t); },
+    effect(fn) { return typeof fn === "function" ? fn() : undefined; },
+    on() { return () => {}; },
+  };
+
+  window.__pomo.exports.apply(fakeCtx);
+
+  // —— 挂载渲染器 ——
+  function mount(containerId, rendererName, propsFactory) {
+    const container = document.getElementById(containerId);
+    const root = ReactDOM.createRoot(container);
+    const Component = function HarnessProps(props) {
+      return renderers[rendererName](propsFactory(props));
+    };
+    root.render(React.createElement(Component));
+  }
+  mount("toggle-wide", "sidebar.footer.action", () => ({ wide: true }));
+  mount("toggle-narrow", "sidebar.footer.action", () => ({ wide: false }));
+  mount("panel", "shell.overlay", () => ({}));
+  mount("settings-section", "settings.section", () => ({ close: () => log("设置页 close（调试台无操作）") }));
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Dependencies and package artifacts
+node_modules/
+*.tgz
+
+# Test and runtime output
+coverage/
+*.log
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+settings.yaml
+
+# Editor and operating-system files
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

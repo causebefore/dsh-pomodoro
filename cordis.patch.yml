@@ -1,0 +1,7 @@
+# dsh-pomodoro 组合补丁层：随 npm 包分发。
+# 声明了 dsh.bundle.patch 的包经 `dsh plugin --profile web add dsh-pomodoro`
+# 自动加入 profile 的 bundles 层叠；本层只启用插件，默认值由 Config schema 提供，
+# 用户覆盖统一写入 $DSH_HOME/settings.yaml 的 dsh-pomodoro 分节。
+- insert:
+    - id: ui-pomodoro
+      name: dsh-pomodoro
