@@ -116,6 +116,7 @@
     <a href="?fast=1">⚡ 快速模式：专注 8s / 休息 4s</a>
     <a href="?">🐢 真实时长：25min / 5min</a>
     <a href="?fast=1&no-settings=1">🧩 无 settings 域降级</a>
+    <a href="?fast=1&conflict=1">⚔️ 首次写入冲突</a>
     <button onclick="toggleTheme()">🌓 切换明暗主题</button>
   </div>
 
@@ -193,6 +194,7 @@
   // 伪 connection 服务：模拟宿主 settings 域经 /pomodoro 通道送达浏览器半边。
   const urlParams = new URLSearchParams(location.search);
   const noSettings = urlParams.get("no-settings") === "1";
+  let conflictOnce = urlParams.get("conflict") === "1";
   // 伪 settings 域：schema 默认值作为 base，内存态对象模拟用户分节。
   const fakeBase = {
     focusMinutes: 25,
@@ -202,9 +204,44 @@
   };
   let fakeUser = {};
   let fakeRevision = 1;
+  const remoteListeners = new Map();
+  const fakeRemote = {
+    $on(name, listener) {
+      let listeners = remoteListeners.get(name);
+      if (listeners === undefined) {
+        listeners = new Set();
+        remoteListeners.set(name, listeners);
+      }
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    },
+  };
+  const emitRemote = (name, ...args) => {
+    for (const listener of remoteListeners.get(name) ?? []) listener(...args);
+  };
   const fakeSettingsView = () => {
     const value = { ...fakeBase, ...fakeUser };
     return { value, user: fakeUser, revision: fakeRevision, writable: !noSettings };
+  };
+  const fakeSettingsConflict = (expectedRevision) => ({
+    ok: false,
+    error: {
+      code: "SETTINGS_CONFLICT",
+      message: "设置已在其他位置更新",
+      expected: expectedRevision,
+      actual: fakeRevision,
+    },
+  });
+  const externalUpdate = (patch) => {
+    fakeUser = { ...fakeUser, ...patch };
+    fakeRevision += 1;
+    log("外部 settings 更新 → revision " + fakeRevision);
+    emitRemote("settings/document-updated", "dsh-pomodoro");
+  };
+  const injectConflict = () => {
+    if (!conflictOnce) return;
+    conflictOnce = false;
+    externalUpdate({ focusMinutes: fakeSettingsView().value.focusMinutes + 1 });
   };
   const fakeConnection = {
     isLoopback: true,
@@ -217,14 +254,26 @@
         }
         if (endpoint === "settings.save") {
           if (noSettings) return { ok: false, error: { code: "settings-unavailable", message: "当前组合没有可用的 settings 域" } };
-          fakeUser = { ...fakeUser, ...payload };
+          injectConflict();
+          if (!Number.isSafeInteger(payload.expectedRevision) || payload.expectedRevision < 0) {
+            return { ok: false, error: { code: "invalid-request", message: "设置写入缺少有效的 expectedRevision" } };
+          }
+          if (payload.expectedRevision !== fakeRevision) return fakeSettingsConflict(payload.expectedRevision);
+          fakeUser = { ...fakeUser, ...payload.value };
           fakeRevision += 1;
+          emitRemote("settings/document-updated", "dsh-pomodoro");
           return { ok: true, value: fakeSettingsView() };
         }
         if (endpoint === "settings.reset") {
           if (noSettings) return { ok: false, error: { code: "settings-unavailable", message: "当前组合没有可用的 settings 域" } };
+          injectConflict();
+          if (!Number.isSafeInteger(payload.expectedRevision) || payload.expectedRevision < 0) {
+            return { ok: false, error: { code: "invalid-request", message: "设置写入缺少有效的 expectedRevision" } };
+          }
+          if (payload.expectedRevision !== fakeRevision) return fakeSettingsConflict(payload.expectedRevision);
           fakeUser = {};
           fakeRevision += 1;
+          emitRemote("settings/document-updated", "dsh-pomodoro");
           return { ok: true, value: fakeSettingsView() };
         }
         return { ok: false, error: { message: "未知端点 " + endpoint } };
@@ -235,12 +284,17 @@
     get(name) {
       if (name === "slots") return fakeSlots;
       if (name === "connection") return fakeConnection;
+      if (name === "remote") return fakeRemote;
       return undefined;
     },
     interval(cb, ms) { const t = setInterval(cb, ms); log("ctx.interval " + ms + "ms"); return () => clearInterval(t); },
     timeout(cb, ms) { const t = setTimeout(cb, ms); return () => clearTimeout(t); },
     effect(fn) { return typeof fn === "function" ? fn() : undefined; },
     on() { return () => {}; },
+  };
+  window.__pomoDebug = {
+    externalUpdate,
+    getSettings: fakeSettingsView,
   };
 
   window.__pomo.exports.apply(fakeCtx);
