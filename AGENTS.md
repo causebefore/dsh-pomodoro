@@ -14,7 +14,7 @@
 
 ## 参考文档与架构约束
 
-本机参考文档位于 `C:\Users\lbq08\Desktop\deepseek-harness\docs`，合规参照范围限定在 `user/develop/` 目录：发布与安装以 `user/develop/basic/publish.zh.md` 为准，插件配置参考 `user/develop/basic/config.zh.md`，Cordis 服务与事件用法参考 `user/develop/framework/。
+本机参考文档位于 `C:\Users\lbq08\Desktop\deepseek-harness\docs`，合规参照范围限定在 `user/develop/` 目录：发布与安装以 `user/develop/basic/publish.zh.md` 为准，插件配置参考 `user/develop/basic/config.zh.md`，Cordis 服务与事件用法参考 `user/develop/framework/`。
 
 ## 开发与验证命令
 
