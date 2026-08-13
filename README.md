@@ -68,11 +68,10 @@ dsh plugin --profile web remove dsh-pomodoro
 
 ```powershell
 npm run check
-Start-Process .\debug.html
 npm pack --dry-run
 ```
 
-调试台支持 `debug.html?fast=1`（8 秒专注／4 秒休息）和 `?fast=1&no-settings=1`（无 settings 服务）。联调本地源码可运行 `dsh plugin --profile web add "link:$PWD"`，修改后重启 `dsh web`。
+联调本地源码可运行 `dsh plugin --profile web add "link:$PWD"`，修改后重启 `dsh web`。
 
 项目没有构建步骤，`lib/client.js` 是直接发布的浏览器 bundle，因此组件样式由该 bundle 通过 `style[data-plugin]` 注入并由宿主模块系统接管。若以后引入构建链，应重新评估迁移到 CSS Modules。
 

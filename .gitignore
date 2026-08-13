@@ -5,6 +5,7 @@ node_modules/
 # Test and runtime output
 coverage/
 *.log
+debug.html
 
 # Local configuration and secrets
 .env
