@@ -32,3 +32,17 @@ SOFTWARE.
 ```
 
 Upstream project: <https://github.com/facebook/react>
+
+## Completion sound candidates
+
+The MP3 files under `assets/sounds/` are converted from the CC0 release
+"UI Sound Effects (Button Clicks, User Feedback, Notifications)" by Robin Lamb:
+
+- `clear-ding.mp3` from `Ding.wav`
+- `deep-ding.mp3` from `ding_deep.wav`
+- `soft-chimes.mp3` from `chimes.wav`
+
+Source: <https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications>
+
+License: Creative Commons CC0 1.0 Universal
+<https://creativecommons.org/publicdomain/zero/1.0/>
