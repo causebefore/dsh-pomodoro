@@ -153,6 +153,7 @@ npm pack --dry-run
 | `lib/index.js` | Node/Cordis 入口、配置 schema 和 loopback RPC |
 | `lib/client.js` | 浏览器计时引擎、React UI、slot 注册和设置同步 |
 | `assets/sounds/deep-ding.mp3` | CC0 低沉提示音源文件；运行时字节嵌入客户端 bundle |
+| `docs/images/social-preview.jpg` | GitHub 仓库链接的 Social Preview 图片 |
 | `cordis.patch.yml` | 向 DSH Web 组合插入插件服务 |
 | `package.json` | exports、peer 范围、bundle 声明和 npm 发布清单 |
 | `.github/workflows/publish.yml` | GitHub Release 到 npm 的可信发布流程 |
