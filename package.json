@@ -1,7 +1,15 @@
 {
   "name": "dsh-pomodoro",
   "description": "DeepSeek Harness Web 番茄钟插件：可配置专注与休息时长，提供侧栏入口和可拖动浮动面板",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/causebefore/dsh-pomodoro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/causebefore/dsh-pomodoro/issues"
+  },
+  "homepage": "https://github.com/causebefore/dsh-pomodoro#readme",
   "keywords": [
     "deepseek",
     "deepseek-harness",
@@ -35,6 +43,7 @@
       "inject": [
         "@deepseek-ai/dsh-client-connection",
         "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-primitives",
         "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-api-remotes"
       ]
@@ -54,6 +63,7 @@
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-client-connection": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-settings": "^0.1.0-rc.6",
     "react": "^18.2.0"

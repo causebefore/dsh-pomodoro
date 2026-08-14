@@ -32,3 +32,14 @@ SOFTWARE.
 ```
 
 Upstream project: <https://github.com/facebook/react>
+
+## Completion sound
+
+`assets/sounds/deep-ding.mp3` is converted from `ding_deep.wav` in the CC0 release
+"UI Sound Effects (Button Clicks, User Feedback, Notifications)" by Robin Lamb.
+The MP3 bytes are embedded in `lib/client.js` for runtime playback.
+
+Source: <https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications>
+
+License: Creative Commons CC0 1.0 Universal
+<https://creativecommons.org/publicdomain/zero/1.0/>
