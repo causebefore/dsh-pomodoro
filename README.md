@@ -38,15 +38,15 @@
   </tr>
 </table>
 
-### 原生设置集成
+### 插件配置集成
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-settings.png" alt="DSH 设置中的番茄钟配置页面" width="816">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-settings.png" alt="DSH 插件配置中的番茄钟设置卡片" width="612">
 </p>
 
 ## 功能亮点
 
-- **原生集成：** 注册到 DSH 侧栏、浮层和设置页，不需要手动修改 profile 配置。
+- **原生集成：** 注册到 DSH 侧栏、浮层和“插件配置”，不需要手动修改 profile 配置。
 - **完整计时控制：** 支持开始、暂停、重置、跳过、环形进度、阶段提示和已完成专注计数。
 - **可配置循环：** 专注与休息时长可调，并可分别控制是否自动开始休息或下一轮专注。
 - **宿主主题适配：** 复用 DSH 设计令牌，支持明暗主题、键盘焦点和“减少动态效果”偏好。
@@ -88,7 +88,7 @@ dsh web
 | 重置 | 将当前阶段恢复到完整时长并暂停 |
 | 跳过 | 切换到下一阶段并保持暂停 |
 
-在 DSH 的“设置 → 番茄钟”中可以修改：
+在 DSH 的“设置 → 插件 → 插件配置 → 番茄钟”中展开卡片即可修改：
 
 | 设置 | 默认值 | 作用 |
 |---|---:|---|
