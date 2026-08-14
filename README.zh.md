@@ -5,7 +5,7 @@
 <p>为 DeepSeek Harness Web UI 提供专注与休息循环的番茄钟插件。</p>
 
 <p>
-  <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/README.md">English</a> ·
+  <a href="https://github.com/causebefore/dsh-pomodoro/blob/dev/README.md">English</a> ·
   <strong>简体中文</strong>
 </p>
 
