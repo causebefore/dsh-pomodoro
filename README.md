@@ -59,6 +59,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 - **Native DSH integration:** Open Pomodoro from the sidebar and manage its options from the DSH plugin settings page.
 - **Complete timer controls:** Start, pause, reset, or skip a phase, with a circular progress indicator, phase status, and completed-focus count.
+- **Cross-session recovery:** Reloading DSH—or reopening it after closing a tab or restarting the browser—resumes from the original deadline. If the active phase expired while DSH was closed, it is settled once.
 - **Low-distraction mini mode:** Collapse the panel to the phase, countdown, and primary control while retaining drag, expand, and close actions.
 - **Configurable cycles:** Set focus and break durations independently, and choose whether breaks or the next focus session start automatically.
 - **Completion feedback:** Always receive an in-app DSH reminder when a phase ends, with optional sound and background system notifications.
@@ -121,6 +122,8 @@ If the current phase has not started, a new duration takes effect immediately. O
 - **In-app DSH reminder:** Always enabled. It appears when a focus or break phase ends naturally, even if the Pomodoro panel is closed, and indicates whether the next phase started automatically.
 - **Sound:** Off by default. After enabling and saving it, each naturally completed phase plays the sound three times. **Preview** works without saving first.
 - **System notification:** Off by default. When enabling it for the first time, allow notifications in the browser prompt and then select **Save**. Notifications are sent only while the DSH page is in the background or does not have focus.
+
+When every DSH page is closed, the browser cannot play the sound or send a notification at the exact deadline. The next DSH launch restores the timer and settles and reports the expired active phase once.
 
 System notifications require DSH to be served from `localhost`, `127.0.0.1`, or HTTPS, and the DSH page must remain open. The in-app reminder continues to work if sound or system notifications are unavailable.
 

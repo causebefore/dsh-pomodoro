@@ -22,7 +22,8 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "check": "node --check lib/index.js && node --check lib/client.js",
+    "test": "node --test test/runtime-persistence.test.mjs",
+    "check": "node --check lib/index.js && node --check lib/client.js && npm test",
     "prepublishOnly": "npm run check"
   },
   "exports": {
