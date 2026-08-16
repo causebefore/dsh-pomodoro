@@ -2,7 +2,12 @@
 
 <h1>🍅 dsh-pomodoro</h1>
 
-<p>为 DeepSeek Harness Web UI 提供专注与休息循环的轻量番茄钟插件。</p>
+<p>A Pomodoro plugin that adds focus and break cycles to the DeepSeek Harness Web UI.</p>
+
+<p>
+  <strong>English</strong> ·
+  <a href="./README.zh.md">简体中文</a>
+</p>
 
 <p>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
@@ -12,129 +17,145 @@
 </p>
 
 <p>
-  <a href="#界面预览">界面预览</a> ·
-  <a href="#功能亮点">功能亮点</a> ·
-  <a href="#快速安装">快速安装</a> ·
-  <a href="#使用与设置">使用与设置</a> ·
-  <a href="#本地开发">本地开发</a>
+  <a href="#interface-preview">Interface Preview</a> ·
+  <a href="#highlights">Highlights</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#settings-and-notifications">Settings and Notifications</a>
 </p>
 
 </div>
 
-> **兼容性提示：** 当前兼容基线为 DeepSeek Harness `0.1.0-rc.6`。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
+> **Compatibility:** The current compatibility baseline is DeepSeek Harness `0.1.0-rc.6`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
 
-## 界面预览
+## Interface Preview
 
-截图来自插件在真实 DSH Web 宿主中的运行效果，仅裁取插件界面。
+Supports light and dark themes, a compact mini mode, and configuration through DSH plugin settings.
 
 <table>
   <tr>
-    <th align="center">浅色主题</th>
-    <th align="center">深色主题</th>
+    <th align="center">Light theme</th>
+    <th align="center">Dark theme</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-light.png" alt="浅色主题下的番茄钟浮动面板" width="250"></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-dark.png" alt="深色主题下的番茄钟浮动面板" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-light-en.png" alt="Pomodoro floating panel in the light theme" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-dark-en.png" alt="Pomodoro floating panel in the dark theme" width="250"></td>
   </tr>
 </table>
 
-### 迷你模式
+### Mini mode
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-mini.png" alt="只显示阶段、倒计时和主要控制的迷你番茄钟" width="186">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-mini-en.png" alt="Mini Pomodoro panel showing only the phase, countdown, and primary control" width="186">
 </p>
 
-### 插件配置集成
+### Settings
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-settings.png" alt="DSH 插件配置中的番茄钟设置卡片" width="580">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
 </p>
 
-## 功能亮点
+## Highlights
 
-- **原生集成：** 注册到 DSH 侧栏、浮层和“插件配置”，不需要手动修改 profile 配置。
-- **完整计时控制：** 支持开始、暂停、重置、跳过、环形进度、阶段提示和已完成专注计数。
-- **低干扰迷你模式：** 收起后只保留阶段、倒计时和开始/暂停，仍可拖动、展开或关闭。
-- **可配置循环：** 专注与休息时长可调，并可分别控制是否自动开始休息或下一轮专注。
-- **三通道完成提醒：** 阶段结束时显示 DSH 内全局提醒；还可分别开启低沉提示音和后台系统通知。
-- **宿主主题适配：** 复用 DSH 设计令牌，支持明暗主题、键盘焦点和“减少动态效果”偏好。
-- **可预期的降级：** settings 服务不可用或浏览器不是 loopback 连接时，计时器仍可使用，并明确进入只读模式。
+- **Native DSH integration:** Open Pomodoro from the sidebar and manage its options from the DSH plugin settings page.
+- **Complete timer controls:** Start, pause, reset, or skip a phase, with a circular progress indicator, phase status, and completed-focus count.
+- **Cross-session recovery:** Reloading DSH—or reopening it after closing a tab or restarting the browser—resumes from the original deadline. If the active phase expired while DSH was closed, it is settled once.
+- **Low-distraction mini mode:** Collapse the panel to the phase, countdown, and primary control while retaining drag, expand, and close actions.
+- **Configurable cycles:** Set focus and break durations independently, and choose whether breaks or the next focus session start automatically.
+- **Completion feedback:** Always receive an in-app DSH reminder when a phase ends, with optional sound and background system notifications.
+- **DSH language support:** Follows the DSH global locale for Chinese and English. Switching languages updates the mounted plugin UI without resetting the timer or unsaved settings draft.
+- **Interface-aware:** Adapts to DSH light and dark themes, keyboard operation, and the reduced-motion preference.
 
-## 兼容性
+## Requirements
 
-| 组件 | 要求 |
+| Component | Requirement |
 |---|---|
-| DeepSeek Harness | 兼容基线 `0.1.0-rc.6` |
-| Node.js | `^22.19.0` 或 `>=24.0.0` |
-| DSH profile | `web`；headless profile 不提供界面 |
-| 包管理器 | `pnpm` 需在 `PATH` 中，DSH 的 `plugin` 命令会转发给它 |
+| DeepSeek Harness | Compatibility baseline `0.1.0-rc.6` |
+| Node.js | `^22.19.0` or `>=24.0.0` |
+| DSH profile | `web`; headless profiles do not provide the UI |
+| pnpm | Available from the command line |
 
-## 快速安装
+## Quick Start
 
-将插件安装到 `web` profile，并确认组合配置中出现 `dsh-pomodoro`：
+Install the plugin into the `web` profile:
 
 ```powershell
 dsh plugin --profile web add dsh-pomodoro
-dsh --profile web --dump-config
 ```
 
-随后启动或重启 DSH Web：
+Then start or restart DSH Web:
 
 ```powershell
 dsh web
 ```
 
-侧栏底部出现 🍅 按钮即表示插件已加载。包内已经声明 `dsh.bundle`，无需手动编辑 profile 的 `cordis.patch.yml`。
+The plugin is loaded when the 🍅 button appears at the bottom of the sidebar.
 
-## 使用与设置
+## Usage
 
-点击侧栏 🍅 按钮打开或关闭面板，拖动标题栏可以调整面板位置。标题栏中的“迷你”会收起次要信息，“展开”可恢复完整面板。
+Click the sidebar 🍅 button to open or close the panel. Drag the title bar to reposition it. Use **Mini** in the title bar to hide secondary information, and **Expand** to restore the full panel.
 
-| 控件 | 行为 |
+| Control | Behavior |
 |---|---|
-| 开始 / 暂停 | 启动或暂停当前阶段 |
-| 重置 | 将当前阶段恢复到完整时长并暂停 |
-| 跳过 | 切换到下一阶段并保持暂停 |
-| 迷你 / 展开 | 在低遮挡布局与完整控制之间切换 |
+| Start / Pause | Start or pause the current phase |
+| Reset | Restore the current phase to its full duration and pause it |
+| Skip | Move to the next phase and keep it paused |
+| Mini / Expand | Switch between the low-obstruction layout and full controls |
 
-在 DSH 的“设置 → 插件 → 插件配置 → 番茄钟”中展开卡片即可修改：
+## Settings and Notifications
 
-| 设置 | 默认值 | 作用 |
+Open **Settings → Plugins → Plugin configuration → Pomodoro** in DSH to configure:
+
+| Setting | Default | Behavior |
 |---|---:|---|
-| 专注时长 | 25 分钟 | 每轮专注阶段的完整时长 |
-| 休息时长 | 5 分钟 | 每轮休息阶段的完整时长 |
-| 自动开始休息 | 开启 | 专注自然结束后自动启动休息 |
-| 自动开始下一轮专注 | 关闭 | 休息自然结束后自动启动下一轮 |
-| 阶段结束时播放提示音 | 关闭 | 播放 1 秒低沉提示、停 1 秒，共 3 次；可直接试听 |
-| 后台时发送系统通知 | 关闭 | DSH 页面处于后台时，通过浏览器平台 API 发送通知 |
+| Focus duration | 25 minutes | Full duration of each focus phase; accepts an integer from 1 to 240 minutes |
+| Break duration | 5 minutes | Full duration of each break phase; accepts an integer from 1 to 240 minutes |
+| Start breaks automatically | On | Start the break when a focus phase ends naturally |
+| Start the next focus session automatically | Off | Start the next focus session when a break ends naturally |
+| Play a sound when a phase ends | Off | Play the completion sound three times; a preview is available |
+| Send system notifications in the background | Off | Send a browser notification while the DSH page is in the background |
 
-设置保存在 DSH 设置文档的 `dsh-pomodoro` 分节。尚未开始且未被改动的当前阶段会立即采用新时长；运行中或已经暂停的阶段从下一次阶段切换起采用。
+If the current phase has not started, a new duration takes effect immediately. Once timing has started, the new duration applies from the next phase.
 
-保存和清除操作会携带读取时的 revision。若其他标签页或外部编辑已经更新设置，插件会拒绝旧写入、保留当前草稿，并提示重新加载最新设置。
+### Completion feedback
 
-### 完成提醒
+- **In-app DSH reminder:** Always enabled. It appears when a focus or break phase ends naturally, even if the Pomodoro panel is closed, and indicates whether the next phase started automatically.
+- **Sound:** Off by default. After enabling and saving it, each naturally completed phase plays the sound three times. **Preview** works without saving first.
+- **System notification:** Off by default. When enabling it for the first time, allow notifications in the browser prompt and then select **Save**. Notifications are sent only while the DSH page is in the background or does not have focus.
 
-专注或休息自然结束后，插件始终通过 DSH 官方 `shell.overlay` 显示全局提醒，即使番茄钟面板已经关闭也能看到。若下一阶段配置为自动开始，提醒会同时说明新的阶段已经开始。
+When every DSH page is closed, the browser cannot play the sound or send a notification at the exact deadline. The next DSH launch restores the timer and settles and reports the expired active phase once.
 
-“阶段结束时播放提示音”默认关闭。开启并保存后，插件会在每次自然结束时播放内置低沉提示：每次只播放音频的前 1 秒，随后停 1 秒，共 3 次，总提醒时段约 5 秒。“试听”无需先保存；首次开启、试听或开始计时会尝试解锁浏览器音频。若浏览器仍拒绝播放，DSH 内提醒不会受影响。
+System notifications require DSH to be served from `localhost`, `127.0.0.1`, or HTTPS, and the DSH page must remain open. The in-app reminder continues to work if sound or system notifications are unavailable.
 
-“后台时发送系统通知”默认关闭。首次开启时浏览器会请求当前站点的通知权限；授权成功后仍需点击“保存”。插件只把启用意图写入 `settings.yaml` 的 `dsh-pomodoro.systemNotifications`，通知权限仍由浏览器按站点独立管理。若权限被拒绝、浏览器不支持通知或当前地址不是安全上下文，DSH 内提醒会继续工作。
-
-系统通知仅在 DSH 页面处于后台或失去焦点时发送，前台不会与 DSH 内提醒重复打扰。同时启用提示音时，插件会请求系统通知静音，实际效果由浏览器和操作系统决定。请通过 `localhost`、`127.0.0.1` 或 HTTPS 访问，并保持 DSH 页面打开；关闭页面后的可靠提醒不在当前版本支持范围内。
-
-## 更新与移除
+## Updating and Removing
 
 ```powershell
-# 更新到 npm 上的当前版本
+# Update the plugin
 dsh plugin --profile web update dsh-pomodoro
 
-# 从 web profile 移除插件
+# Remove the plugin
 dsh plugin --profile web remove dsh-pomodoro
 ```
 
-执行后重启 `dsh web`。
+Restart `dsh web` after either command.
 
-## 本地开发
+## Links
+
+- [npm package](https://www.npmjs.com/package/dsh-pomodoro)
+- [Releases](https://github.com/causebefore/dsh-pomodoro/releases)
+- [Issue tracker](https://github.com/causebefore/dsh-pomodoro/issues)
+- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
+
+## License
+
+[MIT](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the licenses covering React/ReactDOM and third-party assets such as the CC0 completion sound.
+
+## Development and Maintenance
+
+<details>
+<summary><strong>Show local development, project structure, and release workflow</strong></summary>
+
+### Local development
 
 ```powershell
 git clone https://github.com/causebefore/dsh-pomodoro.git
@@ -144,37 +165,25 @@ npm run check
 npm pack --dry-run
 ```
 
-项目没有生成步骤，`lib/client.js` 就是直接发布的浏览器 bundle。日常开发在 `dev` 分支进行，`main` 只接收已经完成发布检查的版本。
+The project has no build step: `lib/client.js` is the browser bundle that is published directly. Daily development happens on `dev`; `main` only receives versions that have completed release checks.
 
-### 项目结构
+### Project structure
 
-| 路径 | 职责 |
+| Path | Responsibility |
 |---|---|
-| `lib/index.js` | Node/Cordis 入口、配置 schema 和 loopback RPC |
-| `lib/client.js` | 浏览器计时引擎、React UI、slot 注册和设置同步 |
-| `assets/sounds/deep-ding.mp3` | CC0 低沉提示音源文件；运行时字节嵌入客户端 bundle |
-| `docs/images/social-preview.jpg` | GitHub 仓库链接的 Social Preview 图片 |
-| `cordis.patch.yml` | 向 DSH Web 组合插入插件服务 |
-| `package.json` | exports、peer 范围、bundle 声明和 npm 发布清单 |
-| `.github/workflows/publish.yml` | GitHub Release 到 npm 的可信发布流程 |
+| `lib/index.js` | Node/Cordis entry point, configuration schema, and loopback RPC |
+| `lib/client.js` | Browser timer engine, React UI, slot registration, locale messages, and settings synchronization |
+| `assets/sounds/deep-ding.mp3` | Source for the CC0 completion sound; its runtime bytes are embedded in the client bundle |
+| `docs/images/` | Chinese and English README screenshots plus the GitHub Social Preview image |
+| `cordis.patch.yml` | Inserts the plugin service into the DSH Web composition |
+| `package.json` | Exports, peer ranges, bundle declaration, and npm publication allowlist |
+| `.github/workflows/publish.yml` | Trusted Publishing workflow from a GitHub Release to npm |
 
-<details>
-<summary><strong>维护者发布流程</strong></summary>
+### Release workflow
 
-1. 在 `dev` 完成开发和验证，并更新 `package.json` 版本。
-2. 通过发布 PR 将 `dev` 合入 `main`。
-3. 从对应的 `main` 提交创建名称匹配 `vX.Y.Z` 的稳定 GitHub Release。
-4. 发布工作流会验证版本、tag 和 `main` 归属，运行语法与打包检查，再通过 npm Trusted Publishing 发布。
+1. Complete development and validation on `dev`, then update the version in `package.json`.
+2. Merge `dev` into `main` through a release pull request.
+3. Create a stable GitHub Release from the corresponding `main` commit with a name matching `vX.Y.Z`.
+4. The publish workflow validates the version, tag, and `main` ancestry, runs syntax and package checks, and publishes through npm Trusted Publishing.
 
 </details>
-
-## 相关链接
-
-- [npm 包](https://www.npmjs.com/package/dsh-pomodoro)
-- [版本发布](https://github.com/causebefore/dsh-pomodoro/releases)
-- [问题反馈](https://github.com/causebefore/dsh-pomodoro/issues)
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
-
-## License
-
-[MIT](LICENSE)。React/ReactDOM 与 CC0 完成提示音等第三方素材的许可信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

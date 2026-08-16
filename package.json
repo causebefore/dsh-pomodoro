@@ -1,7 +1,7 @@
 {
   "name": "dsh-pomodoro",
-  "description": "DeepSeek Harness Web 番茄钟插件：可配置专注与休息时长，提供侧栏入口和可拖动浮动面板",
-  "version": "0.2.0",
+  "description": "A DeepSeek Harness Web Pomodoro plugin with configurable focus and break intervals, sidebar access, and a draggable floating panel",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/causebefore/dsh-pomodoro.git"
@@ -22,7 +22,8 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "check": "node --check lib/index.js && node --check lib/client.js",
+    "test": "node --test test/runtime-persistence.test.mjs",
+    "check": "node --check lib/index.js && node --check lib/client.js && npm test",
     "prepublishOnly": "npm run check"
   },
   "exports": {
@@ -42,6 +43,7 @@
       "platform": "web",
       "inject": [
         "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale",
         "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-primitives",
         "@deepseek-ai/dsh-client-ui-settings",
@@ -62,6 +64,7 @@
     "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.6",
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-client-connection": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.6",
@@ -72,6 +75,7 @@
     "lib/index.js",
     "lib/client.js",
     "cordis.patch.yml",
+    "README.zh.md",
     "THIRD_PARTY_NOTICES.md"
   ],
   "license": "MIT"
