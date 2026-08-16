@@ -1,7 +1,7 @@
 {
   "name": "dsh-pomodoro",
   "description": "A DeepSeek Harness Web Pomodoro plugin with configurable focus and break intervals, sidebar access, and a draggable floating panel",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/causebefore/dsh-pomodoro.git"
