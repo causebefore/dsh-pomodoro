@@ -38,21 +38,21 @@ Supports light and dark themes, a compact mini mode, and configuration through D
     <th align="center">Dark theme</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-light-en.png" alt="Pomodoro floating panel in the light theme" width="250"></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-dark-en.png" alt="Pomodoro floating panel in the dark theme" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-light-en.png" alt="Pomodoro floating panel in the light theme" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-dark-en.png" alt="Pomodoro floating panel in the dark theme" width="250"></td>
   </tr>
 </table>
 
 ### Mini mode
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-mini-en.png" alt="Mini Pomodoro panel showing only the phase, countdown, and primary control" width="186">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-mini-en.png" alt="Mini Pomodoro panel showing only the phase, countdown, and primary control" width="186">
 </p>
 
 ### Settings
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
 </p>
 
 ## Highlights

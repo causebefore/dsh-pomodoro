@@ -6,12 +6,19 @@ node_modules/
 coverage/
 *.log
 debug.html
+gui-test-screenshots/
+.playwright-mcp/
 
 # Local configuration and secrets
 .env
 .env.*
 !.env.example
 settings.yaml
+
+# Local code intelligence index and agent workspaces
+.codegraph/
+.serena/
+CLAUDE.md
 
 # Editor and operating-system files
 .idea/
