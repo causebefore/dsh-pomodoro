@@ -12,7 +12,7 @@
 <p>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js version" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.6" src="https://img.shields.io/badge/DSH-0.1.0--rc.6-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
 </p>
 
@@ -26,7 +26,7 @@
 
 </div>
 
-> **Compatibility:** The current compatibility baseline is DeepSeek Harness `0.1.0-rc.6`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
+> **Compatibility:** The current compatibility baseline is DeepSeek Harness `0.1.0-rc.7` (`0.1.0-rc.6` is also supported). Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
 
 ## Interface Preview
 
@@ -38,21 +38,21 @@ Supports light and dark themes, a compact mini mode, and configuration through D
     <th align="center">Dark theme</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-light-en.png" alt="Pomodoro floating panel in the light theme" width="250"></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-dark-en.png" alt="Pomodoro floating panel in the dark theme" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-light-en.png" alt="Pomodoro floating panel in the light theme" width="250"></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-dark-en.png" alt="Pomodoro floating panel in the dark theme" width="250"></td>
   </tr>
 </table>
 
 ### Mini mode
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-mini-en.png" alt="Mini Pomodoro panel showing only the phase, countdown, and primary control" width="186">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-mini-en.png" alt="Mini Pomodoro panel showing only the phase, countdown, and primary control" width="186">
 </p>
 
 ### Settings
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/f57cde94489a3ddc9e066ce31d8b263de30c8799/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
 </p>
 
 ## Highlights
@@ -70,7 +70,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | Compatibility baseline `0.1.0-rc.6` |
+| DeepSeek Harness | Compatibility baseline `0.1.0-rc.7`; `0.1.0-rc.6` also supported |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |

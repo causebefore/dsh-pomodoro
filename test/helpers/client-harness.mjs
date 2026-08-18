@@ -53,6 +53,7 @@ export function createSharedEnvironment(initialNow = 100000) {
   const lockRequests = [];
   const storageData = new Map();
   const tabs = new Set();
+  const slotRegistrations = [];
   const lockTails = new Map();
   const channelMembers = new Map();
 
@@ -217,7 +218,10 @@ export function createSharedEnvironment(initialNow = 100000) {
     };
     const slots = {
       inject(_name, register) { return register(); },
-      register() { return () => {}; },
+      register(options) {
+        slotRegistrations.push(options);
+        return () => {};
+      },
     };
     const locale = {
       register() { return () => {}; },
@@ -318,5 +322,6 @@ export function createSharedEnvironment(initialNow = 100000) {
     get writeCount() { return writeCount; },
     get writesOutsideLock() { return writesOutsideLock; },
     get lockRequests() { return lockRequests.slice(); },
+    get slotRegistrations() { return slotRegistrations.slice(); },
   };
 }
