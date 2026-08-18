@@ -22,7 +22,7 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs",
+    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs test/index-rpc.test.mjs",
     "check": "node --check lib/index.js && node --check lib/client.js && npm test",
     "prepublishOnly": "npm run check"
   },
