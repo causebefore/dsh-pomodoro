@@ -41,4 +41,4 @@ JavaScript 使用 ESM、两空格缩进、双引号、分号和多行尾逗号�
 
 ## 提交、PR 与发布
 
-提交采用 Conventional Commit，例如 `fix: 修正阶段提示消失时机`。每个提交只处理一个关注点。PR 需列出验证命令与手测场景；UI 变化附明暗主题截图，peer 或 DSH 契约变化单独说明。发布前核对 README、版本、许可证、`npm pack` 文件清单和干净工作区。除非用户明确授权，代理不得执行真实 `npm publish`。不要提交凭据、`settings.yaml`、日志或 `.tgz`。
+提交采用 Conventional Commit，例如 `fix: 修正阶段提示消失时机`。每个提交只处理一个关注点。PR 需列出验证命令与手测场景；UI 变化附明暗主题截图，peer 或 DSH 契约变化单独说明。发布前核对 README、版本、许可证、`npm pack` 文件清单和干净工作区。发布合并一律经发布 PR 在服务端完成：`gh pr create --base main --head dev` 后 `gh pr merge --merge`，禁止本地 merge 后直推 `main`（服务端合并不产生 push 事件且留下 PR 记录）；随后本地 `git pull` 同步两分支，再从 `main` 创建 Release 触发发布。除非用户明确授权，代理不得执行真实 `npm publish`。不要提交凭据、`settings.yaml`、日志或 `.tgz`。
