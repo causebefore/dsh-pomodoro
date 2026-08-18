@@ -11,6 +11,7 @@
 
 <p>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 版本" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
+  <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 月下载量" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js 版本" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
@@ -21,7 +22,8 @@
   <a href="#功能亮点">功能亮点</a> ·
   <a href="#快速安装">快速安装</a> ·
   <a href="#基本使用">基本使用</a> ·
-  <a href="#设置与提醒">设置与提醒</a>
+  <a href="#设置与提醒">设置与提醒</a> ·
+  <a href="#故障排查">故障排查</a>
 </p>
 
 </div>
@@ -138,6 +140,15 @@ dsh plugin --profile web remove dsh-pomodoro
 ```
 
 执行后重启 `dsh web`。
+
+## 故障排查
+
+| 症状 | 处理 |
+|---|---|
+| 安装或更新时报 `'pnpm' 不是内部或外部命令` | `dsh plugin` 依赖 PATH 上的 pnpm：执行 `npm install -g pnpm` 后重试 |
+| `dsh web` 启动失败，提示端口 3080 被占用 | 上一个实例仍在运行或已残留：用 `netstat -ano \| findstr :3080` 找到 PID，`taskkill /PID <pid> /F` 结束后重启 |
+| 侧栏没有 🍅 按钮 | 确认使用 `web` profile 且已执行 `dsh plugin --profile web add dsh-pomodoro`，然后重启 `dsh web` |
+| 系统通知不出现 | 检查浏览器站点通知权限并保持 DSH 页面打开，详见[完成提醒](#完成提醒) |
 
 ## 相关链接
 
