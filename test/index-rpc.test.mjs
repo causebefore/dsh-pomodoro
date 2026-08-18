@@ -1,12 +1,75 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-
-import { apply, Config, SETTINGS_NAMESPACE } from "../lib/index.js";
+import { registerHooks } from "node:module";
 
 // lib/index.js 的 Node 半边此前没有单测。这里用最小 mock 把 /pomodoro RPC
 // 契约钉进断言：settings 缺席降级、expectedRevision 校验、值校验、
 // SETTINGS_CONFLICT 映射、未知端点拒绝，以及 settings 子 fiber 卸载后的
 // 回卷行为，防止宿主升级或重构时契约无声漂移。
+//
+// CI 刻意零依赖（不执行 npm install），两个 @deepseek-ai 导入经
+// registerHooks 重定向到下面的语义忠实 mock（与真实 schemastery /
+// dsh-settings 的行为逐项核对过：natural=非负整数、min/max 边界、
+// default 填充、未知键忽略、settingsNamespace 恒等映射）。lib/index.js
+// 本体始终加载真实源码，被测的是它的分支逻辑而非 schema 库本身。
+
+const mockModuleUrl = (source) => "data:text/javascript," + encodeURIComponent(source);
+
+const schemasteryMock = `
+const field = (check, typeName) => ({
+  typeName,
+  minValue: -Infinity,
+  maxValue: Infinity,
+  defaultValue: undefined,
+  min(n) { this.minValue = n; return this; },
+  max(n) { this.maxValue = n; return this; },
+  default(v) { this.defaultValue = v; return this; },
+  validate(value, path) {
+    if (!check(value)) throw new TypeError(path + " expected " + typeName + " but got " + JSON.stringify(value));
+    if (value < this.minValue) throw new TypeError(path + " expected number >= " + this.minValue + " but got " + value);
+    if (value > this.maxValue) throw new TypeError(path + " expected number <= " + this.maxValue + " but got " + value);
+  },
+});
+export default {
+  object(shape) {
+    return (value) => {
+      if (value === undefined || value === null) value = {};
+      if (typeof value !== "object" || Array.isArray(value)) {
+        throw new TypeError("expected object");
+      }
+      const out = {};
+      for (const [key, entry] of Object.entries(shape)) {
+        const raw = Object.prototype.hasOwnProperty.call(value, key) ? value[key] : entry.defaultValue;
+        if (raw === undefined) throw new TypeError("$." + key + " is required");
+        entry.validate(raw, "$." + key);
+        out[key] = raw;
+      }
+      return out;
+    };
+  },
+  natural: () => field((v) => Number.isSafeInteger(v) && v >= 0, "natural"),
+  boolean: () => field((v) => typeof v === "boolean", "boolean"),
+};
+`;
+
+const dshSettingsMock = `
+export const settingsNamespace = (name) => name;
+`;
+
+const dependencyHooks = registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === "@deepseek-ai/schemastery") {
+      return { url: mockModuleUrl(schemasteryMock), shortCircuit: true };
+    }
+    if (specifier === "@deepseek-ai/dsh-settings") {
+      return { url: mockModuleUrl(dshSettingsMock), shortCircuit: true };
+    }
+    return nextResolve(specifier, context);
+  },
+});
+
+const { apply, Config, SETTINGS_NAMESPACE } = await import("../lib/index.js");
+dependencyHooks.deregister();
 
 function createSettingsProvider({ revision = 3, value, writable = true, conflictOnUpdate = false } = {}) {
   let current = { revision, value: { ...Config(value ?? {}) } };
