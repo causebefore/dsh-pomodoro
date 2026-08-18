@@ -315,6 +315,11 @@ export function createSharedEnvironment(initialNow = 100000) {
     advance(ms) { now += ms; },
     seed(snapshot) { storageData.set(RUNTIME_STORAGE_KEY, JSON.stringify(snapshot)); },
     seedRaw(raw) { storageData.set(RUNTIME_STORAGE_KEY, raw); },
+    seedKey(key, raw) { storageData.set(key, raw); },
+    readKey(key) {
+      const raw = storageData.get(key);
+      return raw === undefined ? null : raw;
+    },
     read() {
       const raw = storageData.get(RUNTIME_STORAGE_KEY);
       return raw === undefined ? null : JSON.parse(raw);

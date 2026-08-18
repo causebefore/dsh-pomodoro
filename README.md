@@ -11,6 +11,7 @@
 
 <p>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
+  <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm monthly downloads" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js version" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
@@ -21,7 +22,8 @@
   <a href="#highlights">Highlights</a> ·
   <a href="#quick-start">Quick Start</a> ·
   <a href="#usage">Usage</a> ·
-  <a href="#settings-and-notifications">Settings and Notifications</a>
+  <a href="#settings-and-notifications">Settings and Notifications</a> ·
+  <a href="#troubleshooting">Troubleshooting</a>
 </p>
 
 </div>
@@ -138,6 +140,15 @@ dsh plugin --profile web remove dsh-pomodoro
 ```
 
 Restart `dsh web` after either command.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `'pnpm' is not recognized` during install or update | `dsh plugin` forwards to pnpm on PATH: run `npm install -g pnpm` and retry |
+| `dsh web` fails to start because port 3080 is in use | A previous instance is still running: find the PID with `netstat -ano \| findstr :3080`, end it with `taskkill /PID <pid> /F`, then restart |
+| No 🍅 button in the sidebar | Confirm you are on the `web` profile and ran `dsh plugin --profile web add dsh-pomodoro`, then restart `dsh web` |
+| System notifications never arrive | Check browser notification permission and keep the DSH page open; see [Completion feedback](#completion-feedback) |
 
 ## Links
 
