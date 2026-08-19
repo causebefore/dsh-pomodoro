@@ -14,6 +14,7 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 月下载量" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js 版本" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
   <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
 </p>
 
