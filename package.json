@@ -1,7 +1,7 @@
 {
   "name": "dsh-pomodoro",
   "description": "A DeepSeek Harness Web Pomodoro plugin with configurable focus and break intervals, sidebar access, and a draggable floating panel",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/causebefore/dsh-pomodoro.git"
@@ -22,7 +22,7 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs",
+    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs test/index-rpc.test.mjs test/panel-position.test.mjs",
     "check": "node --check lib/index.js && node --check lib/client.js && npm test",
     "prepublishOnly": "npm run check"
   },
