@@ -18,6 +18,10 @@
 </p>
 
 <p>
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-demo.gif" alt="Demo: a focus phase runs down, a completion reminder appears, the break starts automatically, the next focus session follows, and the panel collapses into mini mode" width="560">
+</p>
+
+<p>
   <a href="#interface-preview">Interface Preview</a> ·
   <a href="#highlights">Highlights</a> ·
   <a href="#quick-start">Quick Start</a> ·

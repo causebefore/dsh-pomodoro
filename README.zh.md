@@ -18,6 +18,10 @@
 </p>
 
 <p>
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-demo.gif" alt="演示：专注阶段倒计时走动，阶段结束提醒出现并自动进入休息，随后自动开始下一轮专注，最后面板收起为迷你模式" width="560">
+</p>
+
+<p>
   <a href="#界面预览">界面预览</a> ·
   <a href="#功能亮点">功能亮点</a> ·
   <a href="#快速安装">快速安装</a> ·
