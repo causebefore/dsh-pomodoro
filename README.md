@@ -33,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** The current compatibility baseline is DeepSeek Harness `0.1.0-rc.7` (`0.1.0-rc.6` is also supported). Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
+> **Compatibility:** Requires DeepSeek Harness `>=0.1.0-rc.7`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
 
 ## Interface Preview
 
@@ -77,7 +77,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | Compatibility baseline `0.1.0-rc.7`; `0.1.0-rc.6` also supported |
+| DeepSeek Harness | `>=0.1.0-rc.7` |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |

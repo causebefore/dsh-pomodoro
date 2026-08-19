@@ -33,7 +33,7 @@
 
 </div>
 
-> **兼容性提示：** 当前兼容基线为 DeepSeek Harness `0.1.0-rc.7`（同时兼容 `0.1.0-rc.6`）。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
+> **兼容性提示：** 需要 DeepSeek Harness `>=0.1.0-rc.7`。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
 
 ## 界面预览
 
@@ -77,7 +77,7 @@
 
 | 组件 | 要求 |
 |---|---|
-| DeepSeek Harness | 兼容基线 `0.1.0-rc.7`，向下兼容 `0.1.0-rc.6` |
+| DeepSeek Harness | `>=0.1.0-rc.7` |
 | Node.js | `^22.19.0` 或 `>=24.0.0` |
 | DSH profile | `web`；headless profile 不提供界面 |
 | pnpm | 可从命令行使用 |
