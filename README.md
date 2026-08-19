@@ -13,8 +13,13 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm monthly downloads" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js version" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH >=0.1.0-rc.7" src="https://img.shields.io/badge/DSH-%3E%3D0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
+</p>
+
+<p>
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-demo.gif" alt="Demo: a focus phase runs down, a completion reminder appears, the break starts automatically, the next focus session follows, and the panel collapses into mini mode" width="560">
 </p>
 
 <p>
@@ -28,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** The current compatibility baseline is DeepSeek Harness `0.1.0-rc.7` (`0.1.0-rc.6` is also supported). Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
+> **Compatibility:** Requires DeepSeek Harness `>=0.1.0-rc.7`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
 
 ## Interface Preview
 
@@ -72,7 +77,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | Compatibility baseline `0.1.0-rc.7`; `0.1.0-rc.6` also supported |
+| DeepSeek Harness | `>=0.1.0-rc.7` |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |
@@ -92,6 +97,13 @@ dsh web
 ```
 
 The plugin is loaded when the 🍅 button appears at the bottom of the sidebar.
+
+### Install from the DSH UI
+
+Prefer staying in the Web UI? Two community companions can install this plugin for you:
+
+- **[dsh-market](https://github.com/dsh-market/dsh-market)** — install it once with `dsh plugin --profile web add dshmarket` and restart `dsh web`, then open **Settings → Plugin Market**, search for `dsh-pomodoro`, and install it with one click. The plugin goes live after a page refresh.
+- **[dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin)** — install it once with `dsh plugin --profile web add dsh-find-plugin` and restart `dsh web`, then just tell the agent: "install the dsh-pomodoro plugin for DSH". It finds the plugin and runs the install for you; refresh the browser when it finishes.
 
 ## Usage
 

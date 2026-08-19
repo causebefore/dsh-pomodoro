@@ -13,8 +13,13 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 版本" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 月下载量" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js 版本" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.0-rc.7" src="https://img.shields.io/badge/DSH-0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH >=0.1.0-rc.7" src="https://img.shields.io/badge/DSH-%3E%3D0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
+</p>
+
+<p>
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-demo.gif" alt="演示：专注阶段倒计时走动，阶段结束提醒出现并自动进入休息，随后自动开始下一轮专注，最后面板收起为迷你模式" width="560">
 </p>
 
 <p>
@@ -28,7 +33,7 @@
 
 </div>
 
-> **兼容性提示：** 当前兼容基线为 DeepSeek Harness `0.1.0-rc.7`（同时兼容 `0.1.0-rc.6`）。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
+> **兼容性提示：** 需要 DeepSeek Harness `>=0.1.0-rc.7`。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
 
 ## 界面预览
 
@@ -72,7 +77,7 @@
 
 | 组件 | 要求 |
 |---|---|
-| DeepSeek Harness | 兼容基线 `0.1.0-rc.7`，向下兼容 `0.1.0-rc.6` |
+| DeepSeek Harness | `>=0.1.0-rc.7` |
 | Node.js | `^22.19.0` 或 `>=24.0.0` |
 | DSH profile | `web`；headless profile 不提供界面 |
 | pnpm | 可从命令行使用 |
@@ -92,6 +97,13 @@ dsh web
 ```
 
 侧栏底部出现 🍅 按钮即表示插件已加载。
+
+### 在 DSH 界面内安装
+
+不想离开 Web 界面？两个社区伴侣插件都可以代劳：
+
+- **[dsh-market](https://github.com/dsh-market/dsh-market)**：先执行 `dsh plugin --profile web add dshmarket` 并重启 `dsh web`，然后打开“设置 → 插件市场”，搜索 `dsh-pomodoro` 一键安装，刷新页面即可使用。
+- **[dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin)**：先执行 `dsh plugin --profile web add dsh-find-plugin` 并重启 `dsh web`，然后直接对话“帮我安装 dsh-pomodoro 插件到 dsh”，agent 会搜索并完成安装，结束后刷新浏览器即可。
 
 ## 基本使用
 
