@@ -98,6 +98,13 @@ dsh web
 
 侧栏底部出现 🍅 按钮即表示插件已加载。
 
+### 在 DSH 界面内安装
+
+不想离开 Web 界面？两个社区伴侣插件都可以代劳：
+
+- **[dsh-market](https://github.com/dsh-market/dsh-market)**：先执行 `dsh plugin --profile web add dshmarket` 并重启 `dsh web`，然后打开“设置 → 插件市场”，搜索 `dsh-pomodoro` 一键安装，刷新页面即可使用。
+- **[dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin)**：先执行 `dsh plugin --profile web add dsh-find-plugin` 并重启 `dsh web`，然后直接对话“帮我安装 dsh-pomodoro 插件到 dsh”，agent 会搜索并完成安装，结束后刷新浏览器即可。
+
 ## 基本使用
 
 点击侧栏 🍅 按钮打开或关闭面板，拖动标题栏可以调整面板位置。标题栏中的“迷你”会收起次要信息，“展开”可恢复完整面板。

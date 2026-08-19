@@ -98,6 +98,13 @@ dsh web
 
 The plugin is loaded when the 🍅 button appears at the bottom of the sidebar.
 
+### Install from the DSH UI
+
+Prefer staying in the Web UI? Two community companions can install this plugin for you:
+
+- **[dsh-market](https://github.com/dsh-market/dsh-market)** — install it once with `dsh plugin --profile web add dshmarket` and restart `dsh web`, then open **Settings → Plugin Market**, search for `dsh-pomodoro`, and install it with one click. The plugin goes live after a page refresh.
+- **[dsh-find-plugin](https://github.com/awesome-dsh-plugin/dsh-find-plugin)** — install it once with `dsh plugin --profile web add dsh-find-plugin` and restart `dsh web`, then just tell the agent: "install the dsh-pomodoro plugin for DSH". It finds the plugin and runs the install for you; refresh the browser when it finishes.
+
 ## Usage
 
 Click the sidebar 🍅 button to open or close the panel. Drag the title bar to reposition it. Use **Mini** in the title bar to hide secondary information, and **Expand** to restore the full panel.
