@@ -19,7 +19,7 @@
 </p>
 
 <p>
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/dev/docs/images/pomodoro-demo.gif" alt="Demo: a focus phase runs down, a completion reminder appears, the break starts automatically, the next focus session follows, and the panel collapses into mini mode" width="560">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-demo.gif" alt="Demo: a focus phase runs down, a completion reminder appears, the break starts automatically, the next focus session follows, and the panel collapses into mini mode" width="560">
 </p>
 
 <p>
