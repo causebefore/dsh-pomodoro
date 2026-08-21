@@ -22,7 +22,7 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs test/index-rpc.test.mjs test/panel-position.test.mjs",
+    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs test/index-rpc.test.mjs test/panel-position.test.mjs test/settings-scope.test.mjs",
     "check": "node --check lib/index.js && node --check lib/client.js && npm test",
     "prepublishOnly": "npm run check"
   },
@@ -47,7 +47,7 @@
         "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-primitives",
         "@deepseek-ai/dsh-client-ui-settings",
-        "@deepseek-ai/dsh-api-remotes"
+        "@deepseek-ai/dsh-client-ui-settings-plugins"
       ]
     }
   },
@@ -61,14 +61,14 @@
     "@deepseek-ai/schemastery": "^3.18.1"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.7",
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-client-connection": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-connection": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-client-ui-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-client-ui-settings-plugins": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1",
     "react": "^18.2.0"
   },
   "files": [
