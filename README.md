@@ -33,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** Requires DeepSeek Harness `>=0.1.0-rc.7`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
+> **Compatibility:** Requires DeepSeek Harness `>=0.1.0-rc.7` and is verified against `0.1.1-rc.2`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
 
 ## Interface Preview
 
@@ -77,7 +77,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | `>=0.1.0-rc.7` |
+| DeepSeek Harness | `>=0.1.0-rc.7` (verified with `0.1.1-rc.2`) |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |
@@ -194,7 +194,7 @@ The project has no build step: `lib/client.js` is the browser bundle that is pub
 
 | Path | Responsibility |
 |---|---|
-| `lib/index.js` | Node/Cordis entry point, configuration schema, and loopback RPC |
+| `lib/index.js` | Node/Cordis entry point, official settings section, and read-only loopback config fallback |
 | `lib/client.js` | Browser timer engine, React UI, slot registration, locale messages, and settings synchronization |
 | `assets/sounds/deep-ding.mp3` | Source for the CC0 completion sound; its runtime bytes are embedded in the client bundle |
 | `docs/images/` | Chinese and English README screenshots plus the GitHub Social Preview image |

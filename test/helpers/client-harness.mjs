@@ -197,21 +197,89 @@ export function createSharedEnvironment(initialNow = 100000) {
     window.window = window;
 
     const settingsRead = options.settingsRead ?? DEFAULT_SETTINGS;
+    const settingsSource = typeof settingsRead === "function" ? settingsRead() : settingsRead;
+    const settingsListeners = new Set();
+    let settingsValue = { ...DEFAULT_SETTINGS };
+    let settingsUser = null;
+    let settingsRevision = 1;
+    let settingsSnapshot = options.settingsUnavailable
+      ? {
+          status: "unavailable",
+          value: undefined,
+          base: { ...DEFAULT_SETTINGS },
+          user: undefined,
+          revision: undefined,
+          writable: false,
+          mode: "host",
+        }
+      : {
+          status: "loading",
+          value: undefined,
+          base: { ...DEFAULT_SETTINGS },
+          user: undefined,
+          revision: undefined,
+          writable: options.settingsWritable !== false,
+          mode: "host",
+        };
+    const publishSettings = () => {
+      settingsSnapshot = {
+        status: "ready",
+        value: { ...settingsValue },
+        base: { ...DEFAULT_SETTINGS },
+        user: settingsUser === null ? null : { ...settingsUser },
+        revision: settingsRevision,
+        writable: options.settingsWritable !== false,
+        mode: "host",
+      };
+      for (const listener of settingsListeners) listener();
+    };
+    if (!options.settingsUnavailable) {
+      Promise.resolve(settingsSource).then((value) => {
+        settingsValue = { ...DEFAULT_SETTINGS, ...value };
+        settingsUser = options.settingsUser === undefined ? null : { ...options.settingsUser };
+        publishSettings();
+      });
+    }
+    const shouldRejectSettingsWrite = (field) => options.settingsWriteRejected === true
+      || options.settingsWriteRejected === field;
+    const settingsScope = {
+      getSnapshot() { return settingsSnapshot; },
+      subscribe(listener) {
+        settingsListeners.add(listener);
+        return () => settingsListeners.delete(listener);
+      },
+      async set(field, value) {
+        if (shouldRejectSettingsWrite(field) || settingsSnapshot.status !== "ready" || !settingsSnapshot.writable) return;
+        settingsUser = { ...(settingsUser ?? {}), [field]: value };
+        settingsValue = { ...settingsValue, [field]: value };
+        settingsRevision += 1;
+        publishSettings();
+      },
+      async unset(field) {
+        if (shouldRejectSettingsWrite(field) || settingsSnapshot.status !== "ready" || !settingsSnapshot.writable) return;
+        const nextUser = { ...(settingsUser ?? {}) };
+        delete nextUser[field];
+        settingsUser = nextUser;
+        settingsValue = { ...settingsValue, [field]: DEFAULT_SETTINGS[field] };
+        settingsRevision += 1;
+        publishSettings();
+      },
+    };
+    const settingsScopeBinder = {
+      bind(spec) {
+        if (spec?.namespace !== "dsh-pomodoro") throw new Error(`Unexpected settings namespace: ${spec?.namespace}`);
+        return settingsScope;
+      },
+    };
     const connection = {
       isLoopback: options.isLoopback !== false,
       rpc: {
         async call(_scope, endpoint) {
-          if (endpoint !== "settings.read") throw new Error(`Unexpected endpoint: ${endpoint}`);
-          const source = typeof settingsRead === "function" ? settingsRead() : settingsRead;
-          const value = await source;
+          if (endpoint !== "config.read") throw new Error(`Unexpected endpoint: ${endpoint}`);
+          const value = await settingsSource;
           return {
             ok: true,
-            value: {
-              value: { ...DEFAULT_SETTINGS, ...value },
-              user: null,
-              revision: 1,
-              writable: true,
-            },
+            value: { ...DEFAULT_SETTINGS, ...value },
           };
         },
       },
@@ -227,10 +295,9 @@ export function createSharedEnvironment(initialNow = 100000) {
       register() { return () => {}; },
       bind() { return (key) => key; },
     };
-    const remote = { $on() { return () => {}; } };
     const ctx = {
       get(name) {
-        return { slots, locale, connection, remote }[name];
+        return { slots, locale, connection, settingsScope: settingsScopeBinder }[name];
       },
       effect(setup) {
         const dispose = setup();
