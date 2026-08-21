@@ -33,7 +33,7 @@
 
 </div>
 
-> **兼容性提示：** 需要 DeepSeek Harness `>=0.1.0-rc.7`。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
+> **兼容性提示：** 需要 DeepSeek Harness `>=0.1.0-rc.7`，并已在 `0.1.1-rc.2` 上完成验证。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
 
 ## 界面预览
 
@@ -77,7 +77,7 @@
 
 | 组件 | 要求 |
 |---|---|
-| DeepSeek Harness | `>=0.1.0-rc.7` |
+| DeepSeek Harness | `>=0.1.0-rc.7`（已验证 `0.1.1-rc.2`） |
 | Node.js | `^22.19.0` 或 `>=24.0.0` |
 | DSH profile | `web`；headless profile 不提供界面 |
 | pnpm | 可从命令行使用 |
@@ -194,7 +194,7 @@ npm pack --dry-run
 
 | 路径 | 职责 |
 |---|---|
-| `lib/index.js` | Node/Cordis 入口、配置 schema 和 loopback RPC |
+| `lib/index.js` | Node/Cordis 入口、官方设置分节与只读 loopback 配置降级 RPC |
 | `lib/client.js` | 浏览器计时引擎、React UI、slot 注册、locale 文案和设置同步 |
 | `assets/sounds/deep-ding.mp3` | CC0 低沉提示音源文件；运行时字节嵌入客户端 bundle |
 | `docs/images/` | 中英文 README 截图与 GitHub Social Preview 图片 |

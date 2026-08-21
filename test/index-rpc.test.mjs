@@ -2,16 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { registerHooks } from "node:module";
 
-// lib/index.js 的 Node 半边此前没有单测。这里用最小 mock 把 /pomodoro RPC
-// 契约钉进断言：settings 缺席降级、expectedRevision 校验、值校验、
-// SETTINGS_CONFLICT 映射、未知端点拒绝，以及 settings 子 fiber 卸载后的
-// 回卷行为，防止宿主升级或重构时契约无声漂移。
-//
-// CI 刻意零依赖（不执行 npm install），两个 @deepseek-ai 导入经
-// registerHooks 重定向到下面的语义忠实 mock（与真实 schemastery /
-// dsh-settings 的行为逐项核对过：natural=非负整数、min/max 边界、
-// default 填充、未知键忽略、settingsNamespace 恒等映射）。lib/index.js
-// 本体始终加载真实源码，被测的是它的分支逻辑而非 schema 库本身。
+// Node 半边迁移到 DSH 官方 installSettingsSection 后，包私有 /pomodoro RPC
+// 只承担 config.read 降级：settings 存在时返回三层解析值，缺席或卸载时退回
+// 组合 entry。CI 仍保持零依赖，两个 @deepseek-ai 导入用语义忠实 mock 接入。
 
 const mockModuleUrl = (source) => "data:text/javascript," + encodeURIComponent(source);
 
@@ -34,9 +27,7 @@ export default {
   object(shape) {
     return (value) => {
       if (value === undefined || value === null) value = {};
-      if (typeof value !== "object" || Array.isArray(value)) {
-        throw new TypeError("expected object");
-      }
+      if (typeof value !== "object" || Array.isArray(value)) throw new TypeError("expected object");
       const out = {};
       for (const [key, entry] of Object.entries(shape)) {
         const raw = Object.prototype.hasOwnProperty.call(value, key) ? value[key] : entry.defaultValue;
@@ -54,6 +45,18 @@ export default {
 
 const dshSettingsMock = `
 export const settingsNamespace = (name) => name;
+export function installSettingsSection(ctx, ns, schema, entry, hooks) {
+  ctx.inject(["settings"], (settingsCtx) => {
+    const scope = settingsCtx.settings.register(ns, schema, { base: entry });
+    hooks.setSource(() => scope.get());
+    settingsCtx.effect(() => () => {
+      hooks.setSource(() => entry);
+      hooks.onChange();
+    });
+    hooks.onChange();
+    scope.watch(() => hooks.onChange());
+  });
+}
 `;
 
 const dependencyHooks = registerHooks({
@@ -71,36 +74,27 @@ const dependencyHooks = registerHooks({
 const { apply, Config, SETTINGS_NAMESPACE } = await import("../lib/index.js");
 dependencyHooks.deregister();
 
-function createSettingsProvider({ revision = 3, value, writable = true, conflictOnUpdate = false } = {}) {
-  let current = { revision, value: { ...Config(value ?? {}) } };
-  const calls = { updates: [], replaces: [] };
-  return {
-    calls,
-    writable,
+function createSettingsProvider(initial = {}) {
+  let current = Config(initial);
+  const watchers = new Set();
+  const provider = {
     registrations: [],
-    async register(ns, schema, options) {
-      this.registrations.push({ ns, schema, options });
-      return { ns };
+    register(ns, schema, options) {
+      provider.registrations.push({ ns, schema, options });
+      return {
+        get: () => current,
+        watch(listener) {
+          watchers.add(listener);
+          return () => watchers.delete(listener);
+        },
+      };
     },
-    // 宿主 settings 服务的 describe 是同步返回数组（index.js 直接 .find）。
-    describe() {
-      return [{ ns: SETTINGS_NAMESPACE, value: { ...current.value }, user: null, revision: current.revision }];
-    },
-    async update(ns, next, expectedRevision) {
-      calls.updates.push({ ns, next, expectedRevision });
-      if (conflictOnUpdate || expectedRevision !== current.revision) {
-        throw { code: "SETTINGS_CONFLICT", expected: expectedRevision, actual: current.revision };
-      }
-      current = { revision: current.revision + 1, value: next };
-    },
-    async replace(ns, next, expectedRevision) {
-      calls.replaces.push({ ns, next, expectedRevision });
-      if (expectedRevision !== current.revision) {
-        throw { code: "SETTINGS_CONFLICT", expected: expectedRevision, actual: current.revision };
-      }
-      current = { revision: current.revision + 1, value: Config(next) };
+    publish(next) {
+      current = Config(next);
+      for (const watcher of watchers) watcher();
     },
   };
+  return provider;
 }
 
 function createContext({ provider } = {}) {
@@ -115,16 +109,13 @@ function createContext({ provider } = {}) {
     },
     inject(deps, install) {
       captured.injected.push(deps);
-      // settings 服务存在时立即挂载子 fiber；provider 为 undefined 时模拟
-      // 组合里没有 settings 服务（inject 回调不执行，子项保持 PENDING）。
       if (provider !== undefined) {
-        const settingsCtx = {
+        install({
           settings: provider,
-          effect(cleanup) {
-            captured.effects.push(cleanup);
+          effect(setup) {
+            captured.effects.push(setup);
           },
-        };
-        install(settingsCtx);
+        });
       }
     },
   };
@@ -137,26 +128,17 @@ function rpcOf(captured) {
   return entry.handler;
 }
 
-const VALID_VALUE = {
-  focusMinutes: 50,
-  breakMinutes: 10,
-  autoStartBreaks: false,
-  autoStartFocus: true,
-  completionSound: true,
-  systemNotifications: true,
-};
-
-test("RPC 注册契约：/pomodoro 通道 + loopback authority + 可选 settings 注入", () => {
+test("RPC 注册契约：只读 config.read + loopback authority + 可选 settings 注入", () => {
   const { ctx, captured } = createContext();
   apply(ctx, {});
   const entry = captured.rpc.get("/pomodoro");
-  assert.ok(entry, "/pomodoro RPC 应已注册");
+  assert.ok(entry);
   assert.equal(typeof entry.handler, "function");
   assert.deepEqual(entry.options, { authority: "loopback" });
   assert.deepEqual(captured.injected, [["settings"]]);
 });
 
-test("settings 命名空间注册：ns + Config schema + 行配置作为 base", () => {
+test("installSettingsSection：namespace、Config 与组合 entry 作为 base", () => {
   const provider = createSettingsProvider();
   const { ctx } = createContext({ provider });
   apply(ctx, { focusMinutes: 45 });
@@ -166,144 +148,49 @@ test("settings 命名空间注册：ns + Config schema + 行配置作为 base", 
   assert.deepEqual(provider.registrations[0].options, { base: Config({ focusMinutes: 45 }) });
 });
 
-test("settings.read：settings 就绪时透传 describe 视图", async () => {
-  const provider = createSettingsProvider({ revision: 7, value: { focusMinutes: 40 } });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.read", undefined);
-  assert.equal(result.ok, true);
-  assert.equal(result.value.revision, 7);
-  assert.equal(result.value.writable, true);
-  assert.equal(result.value.user, null);
-  assert.equal(result.value.value.focusMinutes, 40);
-});
-
-test("settings.read：settings 缺席时降级为 schema 默认值只读视图", async () => {
+test("config.read：settings 缺席时返回组合 entry", async () => {
   const { ctx, captured } = createContext();
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.read", undefined);
-  assert.equal(result.ok, true);
-  assert.deepEqual(result.value, {
-    value: Config(),
-    user: null,
-    revision: 0,
-    writable: false,
-  });
-});
-
-test("settings.save：缺席时返回 settings-unavailable", async () => {
-  const { ctx, captured } = createContext();
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.save", { expectedRevision: 0, value: VALID_VALUE });
+  apply(ctx, { focusMinutes: 40, autoStartBreaks: false });
+  const result = await rpcOf(captured)("config.read", undefined);
   assert.deepEqual(result, {
-    ok: false,
-    error: { code: "settings-unavailable", message: "当前组合没有可用的 settings 域" },
+    ok: true,
+    value: Config({ focusMinutes: 40, autoStartBreaks: false }),
   });
 });
 
-test("settings.save：expectedRevision 缺失或非法时返回 invalid-request", async () => {
-  const provider = createSettingsProvider();
+test("config.read：settings 就绪时返回分层解析值并跟随更新", async () => {
+  const provider = createSettingsProvider({ focusMinutes: 50 });
   const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
+  apply(ctx, { focusMinutes: 40 });
   const rpc = rpcOf(captured);
-  for (const payload of [undefined, {}, { expectedRevision: -1 }, { expectedRevision: 1.5 }, { expectedRevision: "3" }, { expectedRevision: [3] }, null]) {
-    const result = await rpc("settings.save", { ...payload, value: VALID_VALUE });
-    assert.equal(result.error?.code, "invalid-request", `payload ${JSON.stringify(payload)} 应被判为非法`);
-  }
-  assert.equal(provider.calls.updates.length, 0, "非法请求不得触达 settings 服务");
+  assert.equal((await rpc("config.read", {})).value.focusMinutes, 50);
+  provider.publish({ focusMinutes: 55, completionSound: true });
+  const updated = await rpc("config.read", {});
+  assert.equal(updated.value.focusMinutes, 55);
+  assert.equal(updated.value.completionSound, true);
 });
 
-test("settings.save：值不满足 schema 时返回 invalid-value", async () => {
-  const provider = createSettingsProvider();
+test("settings 子 fiber 卸载后 config.read 回退组合 entry", async () => {
+  const provider = createSettingsProvider({ focusMinutes: 50 });
   const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
+  apply(ctx, { focusMinutes: 35 });
+  assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 50);
+  const cleanup = captured.effects[0]();
+  cleanup();
+  assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 35);
+});
+
+test("config.read 返回副本，调用方不能改写当前配置源", async () => {
+  const { ctx, captured } = createContext();
+  apply(ctx, { focusMinutes: 40 });
   const rpc = rpcOf(captured);
-  for (const value of [null, [], "x", 0, { focusMinutes: 0 }, { focusMinutes: 999 }, { autoStartBreaks: "yes" }]) {
-    const result = await rpc("settings.save", { expectedRevision: 3, value });
-    assert.equal(result.error?.code, "invalid-value", `value ${JSON.stringify(value)} 应被 schema 拒绝`);
-  }
-  assert.equal(provider.calls.updates.length, 0);
-});
-
-test("settings.save：合法请求把六个字段与 expectedRevision 交给 update 并返回新视图", async () => {
-  const provider = createSettingsProvider({ revision: 3 });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.save", { expectedRevision: 3, value: VALID_VALUE });
-  assert.equal(result.ok, true);
-  assert.equal(provider.calls.updates.length, 1);
-  assert.equal(provider.calls.updates[0].ns, SETTINGS_NAMESPACE);
-  assert.deepEqual(provider.calls.updates[0].next, VALID_VALUE);
-  assert.equal(provider.calls.updates[0].expectedRevision, 3);
-  assert.deepEqual(result.value.value, VALID_VALUE);
-  assert.equal(result.value.revision, 4);
-});
-
-test("settings.save：SETTINGS_CONFLICT 映射为结构化错误并透传双方 revision", async () => {
-  const provider = createSettingsProvider({ revision: 5, conflictOnUpdate: true });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.save", { expectedRevision: 3, value: VALID_VALUE });
-  assert.equal(result.ok, false);
-  assert.equal(result.error.code, "SETTINGS_CONFLICT");
-  assert.equal(result.error.expected, 3);
-  assert.equal(result.error.actual, 5);
-});
-
-test("settings.save：非冲突异常原样上抛，不吞错", async () => {
-  const provider = createSettingsProvider();
-  provider.update = async () => {
-    throw new Error("disk full");
-  };
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  await assert.rejects(
-    () => rpcOf(captured)("settings.save", { expectedRevision: 3, value: VALID_VALUE }),
-    /disk full/,
-  );
-});
-
-test("settings.reset：以空对象调用 replace 清回默认值", async () => {
-  const provider = createSettingsProvider({ revision: 3, value: { focusMinutes: 40 } });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.reset", { expectedRevision: 3 });
-  assert.equal(result.ok, true);
-  assert.equal(provider.calls.replaces.length, 1);
-  assert.deepEqual(provider.calls.replaces[0].next, {});
-  assert.equal(provider.calls.replaces[0].expectedRevision, 3);
-  assert.deepEqual(result.value.value, Config());
-});
-
-test("settings.reset：revision 不匹配同样映射 SETTINGS_CONFLICT", async () => {
-  const provider = createSettingsProvider({ revision: 4 });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const result = await rpcOf(captured)("settings.reset", { expectedRevision: 2 });
-  assert.equal(result.ok, false);
-  assert.equal(result.error.code, "SETTINGS_CONFLICT");
+  const first = await rpc("config.read", {});
+  first.value.focusMinutes = 99;
+  assert.equal((await rpc("config.read", {})).value.focusMinutes, 40);
 });
 
 test("未知端点直接抛错", async () => {
   const { ctx, captured } = createContext();
   apply(ctx, {});
-  await assert.rejects(
-    () => rpcOf(captured)("settings.nuke", {}),
-    /未知端点/,
-  );
-});
-
-test("settings 子 fiber 卸载（HMR/停用）后写路径回卷为 settings-unavailable", async () => {
-  const provider = createSettingsProvider();
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, {});
-  const rpc = rpcOf(captured);
-  const readBefore = await rpc("settings.read", undefined);
-  assert.equal(readBefore.value.revision, 3);
-  // settingsCtx.effect(fn) 的 fn() 返回清理函数，模拟子 fiber 销毁。
-  const cleanup = captured.effects[0]();
-  cleanup();
-  const result = await rpc("settings.save", { expectedRevision: 3, value: VALID_VALUE });
-  assert.equal(result.error?.code, "settings-unavailable");
-  assert.equal(provider.calls.updates.length, 0);
+  await assert.rejects(() => rpcOf(captured)("settings.save", {}), /未知端点/);
 });
