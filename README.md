@@ -13,7 +13,7 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm monthly downloads" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js version" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH >=0.1.0-rc.7" src="https://img.shields.io/badge/DSH-%3E%3D0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.1-rc.2 / 0.1.2-alpha.2" src="https://img.shields.io/badge/DSH-0.1.1--rc.2%20%7C%200.1.2--alpha.2-4B8BF5"></a>
   <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
 </p>
@@ -33,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** Requires DeepSeek Harness `>=0.1.0-rc.7` and is verified against `0.1.1-rc.2`. Harness is still in developer preview, so recheck plugin compatibility after upgrading DSH.
+> **Compatibility:** Compatible with and verified against DeepSeek Harness `0.1.1-rc.2` and `0.1.2-alpha.2`. Harness is still in developer preview, so recheck plugin compatibility after upgrading to another prerelease.
 
 ## Interface Preview
 
@@ -77,7 +77,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | `>=0.1.0-rc.7` (verified with `0.1.1-rc.2`) |
+| DeepSeek Harness | Verified with `0.1.1-rc.2` and `0.1.2-alpha.2` |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |

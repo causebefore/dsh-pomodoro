@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { registerHooks } from "node:module";
 
-// Node 半边迁移到 DSH 官方 installSettingsSection 后，包私有 /pomodoro RPC
-// 只承担 config.read 降级：settings 存在时返回三层解析值，缺席或卸载时退回
-// 组合 entry。CI 仍保持零依赖，两个 @deepseek-ai 导入用语义忠实 mock 接入。
+// Node 半边需要同时兼容 rc.2 的顶层 helper 与 alpha.2 的 provider 方法。
+// 包私有 /pomodoro RPC 只承担 config.read 降级：settings 存在时返回三层
+// 解析值，缺席或卸载时退回组合 entry。CI 仍保持零依赖。
 
 const mockModuleUrl = (source) => "data:text/javascript," + encodeURIComponent(source);
 
@@ -43,7 +43,7 @@ export default {
 };
 `;
 
-const dshSettingsMock = `
+const legacySettingsMock = `
 export const settingsNamespace = (name) => name;
 export function installSettingsSection(ctx, ns, schema, entry, hooks) {
   ctx.inject(["settings"], (settingsCtx) => {
@@ -59,26 +59,38 @@ export function installSettingsSection(ctx, ns, schema, entry, hooks) {
 }
 `;
 
+// alpha.2 不再导出 settingsNamespace / installSettingsSection。插件若恢复具名导入，
+// 这里会在测试模块加载阶段复现真实宿主的 SyntaxError。
+const alphaSettingsMock = `
+export class SettingsProvider {}
+`;
+
 const dependencyHooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === "@deepseek-ai/schemastery") {
       return { url: mockModuleUrl(schemasteryMock), shortCircuit: true };
     }
     if (specifier === "@deepseek-ai/dsh-settings") {
-      return { url: mockModuleUrl(dshSettingsMock), shortCircuit: true };
+      const source = context.parentURL?.includes("settings-api=alpha")
+        ? alphaSettingsMock
+        : legacySettingsMock;
+      return { url: mockModuleUrl(source), shortCircuit: true };
     }
     return nextResolve(specifier, context);
   },
 });
 
-const { apply, Config, SETTINGS_NAMESPACE } = await import("../lib/index.js");
+const legacyApi = await import("../lib/index.js?settings-api=legacy");
+const alphaApi = await import("../lib/index.js?settings-api=alpha");
 dependencyHooks.deregister();
 
-function createSettingsProvider(initial = {}) {
+function createSettingsProvider(Config, initial = {}) {
   let current = Config(initial);
   const watchers = new Set();
   const provider = {
     registrations: [],
+    installations: [],
+    effect: undefined,
     register(ns, schema, options) {
       provider.registrations.push({ ns, schema, options });
       return {
@@ -88,6 +100,17 @@ function createSettingsProvider(initial = {}) {
           return () => watchers.delete(listener);
         },
       };
+    },
+    installSection(owner, ns, schema, entry, hooks) {
+      provider.installations.push({ owner, ns, schema, entry, hooks });
+      const scope = provider.register(ns, schema, { base: entry });
+      hooks.setSource(() => scope.get());
+      provider.effect(() => () => {
+        hooks.setSource(() => entry);
+        hooks.onChange();
+      });
+      hooks.onChange();
+      scope.watch(() => hooks.onChange());
     },
     publish(next) {
       current = Config(next);
@@ -110,12 +133,14 @@ function createContext({ provider } = {}) {
     inject(deps, install) {
       captured.injected.push(deps);
       if (provider !== undefined) {
-        install({
+        const settingsCtx = {
           settings: provider,
           effect(setup) {
             captured.effects.push(setup);
           },
-        });
+        };
+        provider.effect = settingsCtx.effect;
+        install(settingsCtx);
       }
     },
   };
@@ -128,69 +153,82 @@ function rpcOf(captured) {
   return entry.handler;
 }
 
-test("RPC 注册契约：只读 config.read + loopback authority + 可选 settings 注入", () => {
-  const { ctx, captured } = createContext();
-  apply(ctx, {});
-  const entry = captured.rpc.get("/pomodoro");
-  assert.ok(entry);
-  assert.equal(typeof entry.handler, "function");
-  assert.deepEqual(entry.options, { authority: "loopback" });
-  assert.deepEqual(captured.injected, [["settings"]]);
-});
+for (const [host, api] of [
+  ["rc.2 helper API", legacyApi],
+  ["alpha.2 provider API", alphaApi],
+]) {
+  const { apply, Config, SETTINGS_NAMESPACE } = api;
 
-test("installSettingsSection：namespace、Config 与组合 entry 作为 base", () => {
-  const provider = createSettingsProvider();
-  const { ctx } = createContext({ provider });
-  apply(ctx, { focusMinutes: 45 });
-  assert.equal(provider.registrations.length, 1);
-  assert.equal(provider.registrations[0].ns, SETTINGS_NAMESPACE);
-  assert.equal(provider.registrations[0].schema, Config);
-  assert.deepEqual(provider.registrations[0].options, { base: Config({ focusMinutes: 45 }) });
-});
-
-test("config.read：settings 缺席时返回组合 entry", async () => {
-  const { ctx, captured } = createContext();
-  apply(ctx, { focusMinutes: 40, autoStartBreaks: false });
-  const result = await rpcOf(captured)("config.read", undefined);
-  assert.deepEqual(result, {
-    ok: true,
-    value: Config({ focusMinutes: 40, autoStartBreaks: false }),
+  test(`${host}：RPC 注册契约`, () => {
+    const { ctx, captured } = createContext();
+    apply(ctx, {});
+    const entry = captured.rpc.get("/pomodoro");
+    assert.ok(entry);
+    assert.equal(typeof entry.handler, "function");
+    assert.deepEqual(entry.options, { authority: "loopback" });
+    assert.deepEqual(captured.injected, [["settings"]]);
   });
-});
 
-test("config.read：settings 就绪时返回分层解析值并跟随更新", async () => {
-  const provider = createSettingsProvider({ focusMinutes: 50 });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, { focusMinutes: 40 });
-  const rpc = rpcOf(captured);
-  assert.equal((await rpc("config.read", {})).value.focusMinutes, 50);
-  provider.publish({ focusMinutes: 55, completionSound: true });
-  const updated = await rpc("config.read", {});
-  assert.equal(updated.value.focusMinutes, 55);
-  assert.equal(updated.value.completionSound, true);
-});
+  test(`${host}：namespace、Config 与组合 entry 作为 base`, () => {
+    const provider = createSettingsProvider(Config);
+    const { ctx } = createContext({ provider });
+    apply(ctx, { focusMinutes: 45 });
+    assert.equal(provider.registrations.length, 1);
+    assert.equal(provider.registrations[0].ns, SETTINGS_NAMESPACE);
+    assert.equal(provider.registrations[0].schema, Config);
+    assert.deepEqual(provider.registrations[0].options, { base: Config({ focusMinutes: 45 }) });
+    if (host.startsWith("alpha")) {
+      assert.equal(provider.installations.length, 1);
+      assert.equal(provider.installations[0].owner, ctx);
+    } else {
+      assert.equal(provider.installations.length, 0);
+    }
+  });
 
-test("settings 子 fiber 卸载后 config.read 回退组合 entry", async () => {
-  const provider = createSettingsProvider({ focusMinutes: 50 });
-  const { ctx, captured } = createContext({ provider });
-  apply(ctx, { focusMinutes: 35 });
-  assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 50);
-  const cleanup = captured.effects[0]();
-  cleanup();
-  assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 35);
-});
+  test(`${host}：settings 缺席时返回组合 entry`, async () => {
+    const { ctx, captured } = createContext();
+    apply(ctx, { focusMinutes: 40, autoStartBreaks: false });
+    const result = await rpcOf(captured)("config.read", undefined);
+    assert.deepEqual(result, {
+      ok: true,
+      value: Config({ focusMinutes: 40, autoStartBreaks: false }),
+    });
+  });
 
-test("config.read 返回副本，调用方不能改写当前配置源", async () => {
-  const { ctx, captured } = createContext();
-  apply(ctx, { focusMinutes: 40 });
-  const rpc = rpcOf(captured);
-  const first = await rpc("config.read", {});
-  first.value.focusMinutes = 99;
-  assert.equal((await rpc("config.read", {})).value.focusMinutes, 40);
-});
+  test(`${host}：settings 就绪时返回分层解析值并跟随更新`, async () => {
+    const provider = createSettingsProvider(Config, { focusMinutes: 50 });
+    const { ctx, captured } = createContext({ provider });
+    apply(ctx, { focusMinutes: 40 });
+    const rpc = rpcOf(captured);
+    assert.equal((await rpc("config.read", {})).value.focusMinutes, 50);
+    provider.publish({ focusMinutes: 55, completionSound: true });
+    const updated = await rpc("config.read", {});
+    assert.equal(updated.value.focusMinutes, 55);
+    assert.equal(updated.value.completionSound, true);
+  });
 
-test("未知端点直接抛错", async () => {
-  const { ctx, captured } = createContext();
-  apply(ctx, {});
-  await assert.rejects(() => rpcOf(captured)("settings.save", {}), /未知端点/);
-});
+  test(`${host}：settings 子 fiber 卸载后回退组合 entry`, async () => {
+    const provider = createSettingsProvider(Config, { focusMinutes: 50 });
+    const { ctx, captured } = createContext({ provider });
+    apply(ctx, { focusMinutes: 35 });
+    assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 50);
+    const cleanup = captured.effects[0]();
+    cleanup();
+    assert.equal((await rpcOf(captured)("config.read", {})).value.focusMinutes, 35);
+  });
+
+  test(`${host}：config.read 返回副本`, async () => {
+    const { ctx, captured } = createContext();
+    apply(ctx, { focusMinutes: 40 });
+    const rpc = rpcOf(captured);
+    const first = await rpc("config.read", {});
+    first.value.focusMinutes = 99;
+    assert.equal((await rpc("config.read", {})).value.focusMinutes, 40);
+  });
+
+  test(`${host}：未知端点直接抛错`, async () => {
+    const { ctx, captured } = createContext();
+    apply(ctx, {});
+    await assert.rejects(() => rpcOf(captured)("settings.save", {}), /未知端点/);
+  });
+}
