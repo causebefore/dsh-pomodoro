@@ -20,5 +20,5 @@ test("peer 只保留直接使用的 Host 公共契约，并覆盖两版 settings
 });
 
 test("兼容修复使用 patch 版本发布", () => {
-  assert.equal(manifest.version, "0.5.1");
+  assert.equal(manifest.version, "0.5.2");
 });
