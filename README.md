@@ -33,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** DeepSeek Harness is evolving quickly, so this plugin tracks rc releases only: development and verification target rc baselines, with no commitment to intermediate prereleases such as alpha. Currently verified with `0.1.1-rc.2` and `0.1.2-rc.1`; recheck plugin compatibility after upgrading to another DSH version.
+> **Compatibility:** DeepSeek Harness is evolving quickly, so this plugin tracks rc releases only: development and verification target rc baselines, with no commitment to intermediate prereleases such as alpha. The DSH version each release targets is noted in its [Releases](https://github.com/causebefore/dsh-pomodoro/releases) notes; after upgrading DSH, confirm compatibility against the release notes.
 
 ## Interface Preview
 
