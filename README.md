@@ -33,7 +33,7 @@
 
 </div>
 
-> **Compatibility:** Compatible with and verified against DeepSeek Harness `0.1.1-rc.2` and `0.1.2-rc.1`. Harness is still in developer preview, so recheck plugin compatibility after upgrading to another prerelease.
+> **Compatibility:** DeepSeek Harness is evolving quickly, so this plugin tracks rc releases only: development and verification target rc baselines, with no commitment to intermediate prereleases such as alpha. Currently verified with `0.1.1-rc.2` and `0.1.2-rc.1`; recheck plugin compatibility after upgrading to another DSH version.
 
 ## Interface Preview
 
