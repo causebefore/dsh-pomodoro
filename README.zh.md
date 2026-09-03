@@ -13,7 +13,7 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 版本" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm 月下载量" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js 版本" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH >=0.1.0-rc.7" src="https://img.shields.io/badge/DSH-%3E%3D0.1.0--rc.7-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.1-rc.2 / 0.1.2-rc.1" src="https://img.shields.io/badge/DSH-0.1.1--rc.2%20%7C%200.1.2--rc.1-4B8BF5"></a>
   <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
 </p>
@@ -33,7 +33,7 @@
 
 </div>
 
-> **兼容性提示：** 需要 DeepSeek Harness `>=0.1.0-rc.7`，并已在 `0.1.1-rc.2` 上完成验证。Harness 仍处于开发者预览阶段，升级 DSH 后请重新确认插件兼容性。
+> **兼容性提示：** DeepSeek Harness 目前迭代迅速，本插件仅跟进 rc 版本：开发与验证均以 rc 基线为准，不承诺支持 alpha 等中间预发布。每个发布版本适配的 DSH 版本都在 [Releases](https://github.com/causebefore/dsh-pomodoro/releases) 说明中注明；升级 DSH 后，请先对照 Release 说明确认插件兼容性。
 
 ## 界面预览
 
@@ -77,7 +77,7 @@
 
 | 组件 | 要求 |
 |---|---|
-| DeepSeek Harness | `>=0.1.0-rc.7`（已验证 `0.1.1-rc.2`） |
+| DeepSeek Harness | 已验证 `0.1.1-rc.2`、`0.1.2-rc.1` |
 | Node.js | `^22.19.0` 或 `>=24.0.0` |
 | DSH profile | `web`；headless profile 不提供界面 |
 | pnpm | 可从命令行使用 |
