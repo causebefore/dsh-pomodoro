@@ -13,7 +13,7 @@
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-pomodoro.svg?logo=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="npm monthly downloads" src="https://img.shields.io/npm/d18m/dsh-pomodoro.svg"></a>
   <a href="https://www.npmjs.com/package/dsh-pomodoro"><img alt="Node.js version" src="https://img.shields.io/node/v/dsh-pomodoro.svg?logo=node.js"></a>
-  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.1-rc.2 / 0.1.2-rc.1" src="https://img.shields.io/badge/DSH-0.1.1--rc.2%20%7C%200.1.2--rc.1-4B8BF5"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH 0.1.1-rc.2 / 0.1.2-rc.1 / 0.1.5-rc.2" src="https://img.shields.io/badge/DSH-0.1.1--rc.2%20%7C%200.1.2--rc.1%20%7C%200.1.5--rc.2-4B8BF5"></a>
   <a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
   <a href="https://github.com/causebefore/dsh-pomodoro/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/dsh-pomodoro.svg"></a>
 </p>
@@ -77,7 +77,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | Verified with `0.1.1-rc.2` and `0.1.2-rc.1` |
+| DeepSeek Harness | Verified with `0.1.1-rc.2`, `0.1.2-rc.1`, and `0.1.5-rc.2` |
 | Node.js | `^22.19.0` or `>=24.0.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |
@@ -194,7 +194,7 @@ The project has no build step: `lib/client.js` is the browser bundle that is pub
 
 | Path | Responsibility |
 |---|---|
-| `lib/index.js` | Node/Cordis entry point, official settings section, and read-only loopback config fallback |
+| `lib/index.js` | Node/Cordis entry point, official settings section, and the read-only config fallback channel (GET route on 0.1.2+ / loopback RPC on older hosts) |
 | `lib/client.js` | Browser timer engine, React UI, slot registration, locale messages, and settings synchronization |
 | `assets/sounds/deep-ding.mp3` | Source for the CC0 completion sound; its runtime bytes are embedded in the client bundle |
 | `docs/images/` | Chinese and English README screenshots plus the GitHub Social Preview image |
