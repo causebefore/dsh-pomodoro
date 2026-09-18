@@ -79,11 +79,62 @@ test("官方 settingsScope：宿主吞掉写入失败时不误报成功", async 
 test("settingsScope 不可用时 config.read 仍让计时引擎完成降级启动", async () => {
   const { tab } = await readyTab({ settingsUnavailable: true, settingsRead: { focusMinutes: 35 } });
   assert.equal(tab.api.isRuntimeReady(), true);
+  assert.equal(tab.api.getRuntimeSnapshot().totalMs, 35 * 60 * 1000);
+  assert.equal(tab.rpcCalls.length, 1);
   assert.equal(tab.api.settings.getSnapshot().status, "unavailable");
   await assert.rejects(
     () => tab.api.settings.save(VALUE, undefined),
     (error) => error?.code === "settings-unavailable",
   );
+  tab.dispose();
+});
+
+test("0.1.2+ 降级配置由 GET 路由读取且不调用旧 RPC", async () => {
+  const { tab } = await readyTab({
+    settingsUnavailable: true,
+    fetch: async (url) => ({
+      status: 200,
+      async json() {
+        return { ok: true, value: { ...VALUE, focusMinutes: 35 } };
+      },
+    }),
+  });
+  assert.equal(tab.api.isRuntimeReady(), true);
+  assert.equal(tab.api.getRuntimeSnapshot().totalMs, 35 * 60 * 1000);
+  assert.deepEqual(tab.fetchCalls.map(([url]) => url), ["/api/pomodoro/config"]);
+  assert.equal(tab.rpcCalls.length, 0);
+  assert.equal(tab.errors.length, 0);
+  tab.dispose();
+});
+
+test("GET 路由返回 404 时回退旧宿主 RPC", async () => {
+  const { tab } = await readyTab({
+    settingsUnavailable: true,
+    settingsRead: { focusMinutes: 35 },
+    fetch: async () => ({ status: 404 }),
+  });
+  assert.equal(tab.api.isRuntimeReady(), true);
+  assert.equal(tab.api.getRuntimeSnapshot().totalMs, 35 * 60 * 1000);
+  assert.equal(tab.fetchCalls.length, 1);
+  assert.equal(tab.rpcCalls.length, 1);
+  assert.equal(tab.rpcCalls[0].scope, "/pomodoro");
+  assert.equal(tab.rpcCalls[0].endpoint, "config.read");
+  assert.deepEqual(Object.keys(tab.rpcCalls[0].payload), []);
+  assert.equal(tab.errors.length, 0);
+  tab.dispose();
+});
+
+test("GET 路由非 404 失败时不回退未注册的旧 RPC", async () => {
+  const { tab } = await readyTab({
+    settingsUnavailable: true,
+    fetch: async () => ({ status: 401 }),
+  });
+  assert.equal(tab.api.isRuntimeReady(), true);
+  assert.equal(tab.api.getRuntimeSnapshot().totalMs, 25 * 60 * 1000);
+  assert.equal(tab.fetchCalls.length, 1);
+  assert.equal(tab.rpcCalls.length, 0);
+  assert.equal(tab.errors.length, 1);
+  assert.match(String(tab.errors[0][1]), /config\.read HTTP 401/);
   tab.dispose();
 });
 

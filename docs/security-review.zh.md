@@ -8,7 +8,7 @@ DSH 插件在宿主进程内以全权限执行，且安装链（`dsh plugin add`
 
 | 讨论 | 要点 | 对应审查项 |
 | --- | --- | --- |
-| [deepseek-harness#454](https://github.com/deepseek-ai/deepseek-harness/discussions/454) 第三方插件模型安全审计 | 插件=进程内全权限代码；loopback RPC 是敏感服务面 | RPC 通道逐个钉死 `authority: "loopback"`（≤0.1.1 生效；0.1.2 起宿主对所有通道统一实施"受信来源 + 浏览器会话认证"围栏，该选项被忽略，实测无 cookie 请求 401） |
+| [deepseek-harness#454](https://github.com/deepseek-ai/deepseek-harness/discussions/454) 第三方插件模型安全审计 | 插件=进程内全权限代码；loopback RPC 是敏感服务面 | 降级通道保持只读：0.1.2+ 为 `connection.fetch` 的 GET `/api/pomodoro/config`（宿主统一围栏：受信来源 403 + 浏览器会话认证 401，实测验证）；≤0.1.1 为 `/pomodoro` RPC 逐个钉死 `authority: "loopback"`（0.1.5 起 `rpc.handle` 因宿主 inject 强制从插件纤维不可用，见 v0.5.3 记录） |
 | [deepseek-harness#587](https://github.com/deepseek-ai/deepseek-harness/discussions/587) 启动期配置树写权限 | `cordis.patch.yml` 可在守卫生效前改写 approval/sandbox/credentials 行 | 组合补丁只允许纯 `insert`，禁止引用核心行标识 |
 | [deepseek-harness#3421](https://github.com/deepseek-ai/deepseek-harness/discussions/3421) 补丁静默禁用核心 provider | `replace`/`disabled: true` 可关掉 fs-sandbox、bash、pwsh | 同上 |
 | [deepseek-harness#1770](https://github.com/deepseek-ai/deepseek-harness/discussions/1770) dsh.so 1309 插件扫描 | 严重风险集中在：硬编码密钥、数据外传、混淆代码、破坏性命令 | L1 逐行规则全部四类 |
@@ -85,12 +85,27 @@ node lib/bin.js --full <本仓库路径>
 | L2 契约面 | ✅ | `/pomodoro` 只读 `config.read` 仅返回六个非敏感计时字段；rc.1 真实宿主实测：认证会话 200、无 cookie 401 |
 | L4 隔离冒烟 | —（本版以真实宿主实测替代） | 0.1.2-rc.1 全周期实测：插件加载零报错、设置卡片六字段保存回路、阶段自动切换、明暗主题、reduced-motion、拖动持久化、`:focus-visible` 均通过 |
 
+## 审查记录：v0.5.3（2026-09-14，DSH 0.1.5-rc.2 跟进）
+
+背景：0.1.5 引入 cordis 服务访问强制（访问服务属性须先 inject），暴露上游回归——`rpc.handle` 以连接包自身纤维访问 `webServer`（其 inject 未声明），任何插件调用即 `cannot get property "webServer" without inject`，插件加载失败；插件侧声明 inject 无法修复（探针验证炸点在连接包上下文）。`rpc.intercept('/api')` 每通道单拦截器已被 api-gateway 占用。仓内生产代码已无 `rpc.handle` 消费者，其唯一测试从根上下文调用（webServer provide 在根上）掩盖了该路径。
+
+处置：降级通道按能力检测分流——`connection.fetch.register` 可用（0.1.2+）即注册只读 GET `/api/pomodoro/config`（官方 `SessionMediaReferences` 同款范式，宿主载体统一施加信任与认证围栏），否则保留 ≤0.1.1 的 `/pomodoro` RPC。浏览器侧先 GET、404 回退旧 RPC。
+
+| 层 | 结果 | 说明 |
+| --- | --- | --- |
+| L1 静态规则 | ✅ 0 FAIL / 0 WARN / 8 INFO | `net/browser-egress` 对降级 GET 按字面量窄豁免（见误报台账），其余 fetch 仍 FAIL |
+| L2 契约面 | ✅ | 0.1.5-rc.2 真实宿主实测：GET 认证会话 200（settings 分层解析值）、无 cookie 401、宿主正常启动 |
+| L4 隔离冒烟 | —（真实宿主实测替代） | 0.1.5-rc.2 全量手测见合并说明 |
+
+待办：向 DSH 上游报告 `rpc.handle` 从插件纤维不可用的回归。
+
 ## 误报台账
 
 社区扫描器的已知误报及甄别理由（poison-guard / dsh.so 维度通用）：
 
 | 命中 | 位置 | 甄别 |
 | --- | --- | --- |
+| `net/browser-egress`：fetch 调用 | `lib/client.js` `fetch("/api/pomodoro/config")` | 降级配置通道：同源相对路径只读 GET，读取本插件在宿主注册的 fetch 路由，无任何外部出口；扫描器按字面量窄豁免，其他 fetch 仍 FAIL |
 | `exfil-secrets`：credential-style 名称 | `lib/index.js` `describe({ redactSecrets: true })` | 参数名是宿主 settings API 的脱敏开关，该文件零网络代码 |
 | `obfuscation`：base64 解码 | `lib/client.js` `COMPLETION_SOUND_BASE64` + `atob` | 内嵌完成提示音，9.6KB MP3（ID3 头校验），WebAudio 本地播放，无网络 |
 | `exfil-combo`：读凭据+网络请求 | 全目录组合判定 | 跨文件拼接的产物：凭据词来自上一条参数名，网络代码位于 vendor/测试，发布文件内不存在该组合 |

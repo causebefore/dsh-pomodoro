@@ -11,14 +11,14 @@ test("客户端声明同时覆盖 rc.2 runtime 与 alpha.2 renderer", () => {
   assert.ok(inject.includes("@deepseek-ai/dsh-client-ui-renderer"));
 });
 
-test("peer 只保留直接使用的 Host 公共契约，并覆盖两版 settings", () => {
+test("peer 只保留直接使用的 Host 公共契约，并覆盖历次适配的 settings 版本", () => {
   assert.deepEqual(manifest.peerDependencies, {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2",
+    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.5-0",
   });
   assert.equal(manifest.dependencies["@deepseek-ai/schemastery"], "^3.18.1");
 });
 
 test("兼容修复使用 patch 版本发布", () => {
-  assert.equal(manifest.version, "0.5.2");
+  assert.equal(manifest.version, "0.5.3");
 });

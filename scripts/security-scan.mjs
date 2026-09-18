@@ -54,6 +54,9 @@ const LINE_RULES = [
     pattern: /\bfetch\s*\(|new\s+XMLHttpRequest|new\s+WebSocket\s*\(|sendBeacon\s*\(/,
     level: "FAIL",
     detail: "浏览器网络出口（fetch/XHR/WebSocket/sendBeacon）",
+    // 已知豁免：降级配置通道是同源相对路径只读 GET（0.1.2+ 宿主 fetch 路由），
+    // 见 docs/security-review.zh.md 误报台账。仅放行该字面量，任何其他 fetch 仍 FAIL。
+    exempt: (file, line) => file === "lib/client.js" && line.includes('fetch("/api/pomodoro/config")'),
   },
   {
     rule: "net/node-module",

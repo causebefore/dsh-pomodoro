@@ -120,8 +120,8 @@ function createSettingsProvider(Config, initial = {}) {
   return provider;
 }
 
-function createContext({ provider } = {}) {
-  const captured = { rpc: new Map(), effects: [], injected: [] };
+function createContext({ provider, fetchRoutes = false } = {}) {
+  const captured = { rpc: new Map(), effects: [], injected: [], fetchRoutes: [] };
   const ctx = {
     connection: {
       rpc: {
@@ -129,6 +129,16 @@ function createContext({ provider } = {}) {
           captured.rpc.set(path, { handler, options });
         },
       },
+      ...(fetchRoutes
+        ? {
+            fetch: {
+              register(route) {
+                captured.fetchRoutes.push(route);
+                return () => {};
+              },
+            },
+          }
+        : {}),
     },
     inject(deps, install) {
       captured.injected.push(deps);
@@ -142,6 +152,11 @@ function createContext({ provider } = {}) {
         provider.effect = settingsCtx.effect;
         install(settingsCtx);
       }
+    },
+    effect(setup) {
+      captured.effects.push(setup);
+      const dispose = setup();
+      return typeof dispose === "function" ? dispose : () => {};
     },
   };
   return { ctx, captured };
@@ -157,7 +172,13 @@ for (const [host, api] of [
   ["rc.2 helper API", legacyApi],
   ["alpha.2 provider API", alphaApi],
 ]) {
-  const { apply, Config, SETTINGS_NAMESPACE } = api;
+  const { apply, Config, SETTINGS_NAMESPACE, inject } = api;
+
+  test(`${host}：模块 inject 只声明 connection`, () => {
+    // 降级通道经 connection 服务注册；fetch 路由不需要 webServer 注入
+    //（0.1.5 起 rpc.handle 从插件纤维不可用，与插件侧 inject 声明无关）。
+    assert.deepEqual(inject, ["connection"]);
+  });
 
   test(`${host}：RPC 注册契约`, () => {
     const { ctx, captured } = createContext();
@@ -167,6 +188,22 @@ for (const [host, api] of [
     assert.equal(typeof entry.handler, "function");
     assert.deepEqual(entry.options, { authority: "loopback" });
     assert.deepEqual(captured.injected, [["settings"]]);
+  });
+
+  test(`${host}：fetch 路由可用时不再注册 rpc 通道`, async () => {
+    // 0.1.2+ 宿主提供 connection.fetch；此时降级通道走 GET /api/pomodoro/config，
+    // 老宿主的 /pomodoro RPC 保持不注册。
+    const { ctx, captured } = createContext({ fetchRoutes: true });
+    apply(ctx, { focusMinutes: 40 });
+    assert.equal(captured.rpc.size, 0, "fetch 可用时不应注册 rpc 通道");
+    assert.equal(captured.fetchRoutes.length, 1);
+    const route = captured.fetchRoutes[0];
+    assert.equal(route.path, "/api/pomodoro/config");
+    assert.deepEqual(route.methods, ["GET"]);
+    const response = await route.fetch();
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
+    assert.deepEqual(await response.json(), { ok: true, value: Config({ focusMinutes: 40 }) });
   });
 
   test(`${host}：namespace、Config 与组合 entry 作为 base`, () => {
