@@ -202,6 +202,7 @@ for (const [host, api] of [
     assert.deepEqual(route.methods, ["GET"]);
     const response = await route.fetch();
     assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
     assert.deepEqual(await response.json(), { ok: true, value: Config({ focusMinutes: 40 }) });
   });
 

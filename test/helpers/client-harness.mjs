@@ -101,6 +101,8 @@ export function createSharedEnvironment(initialNow = 100000) {
     const intervals = [];
     const timers = new Map();
     const completions = [];
+    const fetchCalls = [];
+    const rpcCalls = [];
     const warnings = [];
     const errors = [];
     let hook = null;
@@ -274,7 +276,8 @@ export function createSharedEnvironment(initialNow = 100000) {
     const connection = {
       isLoopback: options.isLoopback !== false,
       rpc: {
-        async call(_scope, endpoint) {
+        async call(scope, endpoint, payload) {
+          rpcCalls.push({ scope, endpoint, payload });
           if (endpoint !== "config.read") throw new Error(`Unexpected endpoint: ${endpoint}`);
           const value = await settingsSource;
           return {
@@ -284,6 +287,12 @@ export function createSharedEnvironment(initialNow = 100000) {
         },
       },
     };
+    const fetch = typeof options.fetch === "function"
+      ? async (...args) => {
+          fetchCalls.push(args);
+          return options.fetch(...args);
+        }
+      : undefined;
     const slots = {
       inject(_name, register) { return register(); },
       register(options) {
@@ -325,6 +334,7 @@ export function createSharedEnvironment(initialNow = 100000) {
       Buffer,
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      ...(fetch === undefined ? {} : { fetch }),
     });
     new vm.Script(CLIENT_SOURCE, { filename: "lib/client.js" }).runInContext(context);
     const clientModule = loadedModule.factory((name) => {
@@ -339,6 +349,8 @@ export function createSharedEnvironment(initialNow = 100000) {
       id: tabId,
       api: hook,
       completions,
+      fetchCalls,
+      rpcCalls,
       warnings,
       errors,
       disposed: false,
