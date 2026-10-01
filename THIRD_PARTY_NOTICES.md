@@ -43,3 +43,10 @@ Source: <https://opengameart.org/content/ui-sound-effects-button-clicks-user-fee
 
 License: Creative Commons CC0 1.0 Universal
 <https://creativecommons.org/publicdomain/zero/1.0/>
+
+## YAML parser
+
+The runtime depends on `yaml` by Eemeli Aro, licensed under ISC. Its license is
+distributed with the dependency. It is used only to parse legacy settings as data.
+
+Upstream project: <https://github.com/eemeli/yaml>

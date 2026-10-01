@@ -27,7 +27,7 @@ node scripts/security-scan.mjs
 
 ### L2 契约面人工核对（发布前，或 L1 规则覆盖不到的变更）
 
-- [ ] 新增/修改 RPC 端点：`/pomodoro` 仅暴露只读 `config.read`，返回的六个计时字段均为非敏感配置；不新增写端点，设置写入只经浏览器 settingsScope（revision 乐观锁）落到宿主 settings 服务。
+- [ ] 新增/修改 RPC 端点：`/pomodoro` 仅暴露只读 `config.read`，返回的六个计时字段均为非敏感配置；不新增写端点，设置写入经旧版 settingsScope 或新版 configForms（revision 乐观锁）落到宿主设置服务；旧设置迁移只经 configEditor 的锁内编辑。
 - [ ] 新增浏览器能力（通知/音频/存储之外的新 API）：确认有用户授权门（如 `Notification.requestPermission`），无静默触发。
 - [ ] 设置文案与帮助文本不出现真实路径外的敏感信息。
 
@@ -52,9 +52,9 @@ node lib/bin.js --full <本仓库路径>
 
 注意：`--build` 会在插件目录真实执行 `pnpm install` 并残留 lockfile（本插件产物直接提交、无构建步骤，不需要 `--build`）；doctor 报告的"缺 `prepare` 脚本"是面向"git 安装需构建"模板插件的规则，对本插件不适用。
 
-### L5 CI 集成（建议，尚未接入）
+### L5 CI 集成（已接入）
 
-在 `.github/workflows/ci.yml` 的 validate job 末尾追加一步即可让 L1 成为硬门禁：
+`.github/workflows/ci.yml` 与 `.github/workflows/publish.yml` 均已将 L1 作为硬门禁：
 
 ```yaml
       - name: Security scan (publish surface)
@@ -98,6 +98,21 @@ node lib/bin.js --full <本仓库路径>
 | L4 隔离冒烟 | —（真实宿主实测替代） | 0.1.5-rc.2 全量手测见合并说明 |
 
 待办：向 DSH 上游报告 `rpc.handle` 从插件纤维不可用的回归。
+
+## 审查记录：v0.5.4（2026-10-01，DSH 新配置表单适配）
+
+| 层 | 结果 | 说明 |
+| --- | --- | --- |
+| L1 静态规则 | 0 FAIL / 0 WARN / 9 INFO | 迁移文件进入发布面扫描，仅精确放行该文件的 `readFile` 导入；不关闭 fs、凭据、网络或依赖规则 |
+| L2 配置与迁移 | 通过 | 六字段白名单、普通 YAML core schema、拒绝未知标签、别名展开上限及 1 MiB 文件限制；迁移标记与结果由 configEditor 同次写入，不修改原文件 |
+| L2 只读通道 | 通过 | 新版真实宿主未登录 401，不受信 Origin 403；单元测试确认 no-store 与六字段响应，内部标记不暴露 |
+| L3 依赖审计 | npm audit：0 vulnerabilities | 运行时新增 ISC 许可的 `yaml`；React / react-test-renderer 仅用于组件测试，不进入发布包 |
+| L3 poison-guard | 发布面人工复核通过 | 全仓扫描返回 MALICIOUS，命中 CI / 测试等非发布文件；打包后单独扫描为 SUSPICIOUS：0 high / 2 medium / 1 low；发布 JS 仅 3 项命中：可疑字面量、同源只读 fetch、提示音 base64 解码，均经源码复核 |
+| L3 npm pack | 9 个文件 | 包含新的迁移模块；不包含测试、日志、截图、本地配置、凭据或开发依赖 |
+| L4 真实宿主 | 5 个 rc 基线通过相应回归 | 详细范围与限制见 [v0.5.4 验证记录](validation-v0.5.4.zh.md) |
+| L5 CI | 已接入 | 安装锁定的测试依赖后运行 check、安全扫描与 pack 检查 |
+
+迁移读取路径仅为宿主 `profileContext.home` 下的 `settings.yaml` 与 `settings.yaml.imported`。优先原文件，仅当不存在时读取后者；不读取环境变量、凭据文件或其他插件字段。宿主配置编辑回调在锁内再次检查显式配置，保留并发修改。日志只记录已知字段名和固定 YAML 诊断，不回显其他分节内容。新增 `yaml` 依赖按确切包名进入已审查清单，其他非清单依赖仍报错。
 
 ## 误报台账
 
