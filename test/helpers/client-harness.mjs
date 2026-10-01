@@ -103,6 +103,7 @@ export function createSharedEnvironment(initialNow = 100000) {
     const completions = [];
     const fetchCalls = [];
     const rpcCalls = [];
+    const mutations = [];
     const warnings = [];
     const errors = [];
     let hook = null;
@@ -162,7 +163,7 @@ export function createSharedEnvironment(initialNow = 100000) {
     }
 
     const document = {
-      visibilityState: "visible",
+      visibilityState: options.background ? "hidden" : "visible",
       head: { appendChild() {} },
       querySelector() { return null; },
       createElement() { return { dataset: {}, textContent: "" }; },
@@ -179,6 +180,7 @@ export function createSharedEnvironment(initialNow = 100000) {
       BroadcastChannel: options.withBroadcast === false ? undefined : FakeBroadcastChannel,
       AudioContext: undefined,
       webkitAudioContext: undefined,
+      ...(options.Notification ? { Notification: options.Notification } : {}),
       isSecureContext: true,
       atob: (value) => Buffer.from(value, "base64").toString("binary"),
       addEventListener(name, listener) { addListener(windowListeners, name, listener); },
@@ -250,6 +252,24 @@ export function createSharedEnvironment(initialNow = 100000) {
         settingsListeners.add(listener);
         return () => settingsListeners.delete(listener);
       },
+      async mutate(ops, expectedRevision) {
+        mutations.push(JSON.parse(JSON.stringify({ ops, expectedRevision })));
+        if (options.concurrentSettingsWrite) {
+          settingsRevision += 1;
+          publishSettings();
+        }
+        if (expectedRevision !== settingsRevision || ops.some((op) => shouldRejectSettingsWrite(op.path[0]))) return false;
+        const next = { ...(settingsUser ?? {}) };
+        for (const op of ops) {
+          if (op.op === "set") next[op.path[0]] = op.value;
+          else delete next[op.path[0]];
+        }
+        settingsUser = next;
+        settingsValue = { ...DEFAULT_SETTINGS, ...next };
+        settingsRevision += 1;
+        publishSettings();
+        return true;
+      },
       async set(field, value) {
         if (shouldRejectSettingsWrite(field) || settingsSnapshot.status !== "ready" || !settingsSnapshot.writable) return;
         settingsUser = { ...(settingsUser ?? {}), [field]: value };
@@ -295,9 +315,15 @@ export function createSharedEnvironment(initialNow = 100000) {
       : undefined;
     const slots = {
       inject(_name, register) { return register(); },
-      register(options) {
-        slotRegistrations.push(options);
-        return () => {};
+      register(options, render) {
+        const registration = { ...options, render };
+        slotRegistrations.push(registration);
+        const dispose = () => {
+          const index = slotRegistrations.indexOf(registration);
+          if (index >= 0) slotRegistrations.splice(index, 1);
+        };
+        effectDisposers.push(dispose);
+        return dispose;
       },
     };
     const locale = {
@@ -306,7 +332,17 @@ export function createSharedEnvironment(initialNow = 100000) {
     };
     const ctx = {
       get(name) {
-        return { slots, locale, connection, settingsScope: settingsScopeBinder }[name];
+        return { slots, locale, connection,
+          ...options.modernSettings ? {
+            configForms: { get(id) {
+              if (id !== "ui-pomodoro") throw new Error(`Unexpected entry: ${id}`);
+              return settingsScope;
+            } },
+          } : { settingsScope: settingsScopeBinder },
+        }[name];
+      },
+      inject(names, callback) {
+        if (names.every((name) => ctx.get(name))) callback(ctx);
       },
       effect(setup) {
         const dispose = setup();
@@ -315,7 +351,12 @@ export function createSharedEnvironment(initialNow = 100000) {
       },
       interval(callback) {
         intervals.push(callback);
-        return () => {};
+        const dispose = () => {
+          const index = intervals.indexOf(callback);
+          if (index >= 0) intervals.splice(index, 1);
+        };
+        effectDisposers.push(dispose);
+        return dispose;
       },
       on() { return () => {}; },
     };
@@ -338,7 +379,7 @@ export function createSharedEnvironment(initialNow = 100000) {
     });
     new vm.Script(CLIENT_SOURCE, { filename: "lib/client.js" }).runInContext(context);
     const clientModule = loadedModule.factory((name) => {
-      if (name === "react") return {};
+      if (name === "react") return options.react ?? {};
       if (name === "@deepseek-ai/dsh-client-ui-primitives") return { Toast() {} };
       throw new Error(`Unexpected client dependency: ${name}`);
     });
@@ -351,6 +392,7 @@ export function createSharedEnvironment(initialNow = 100000) {
       completions,
       fetchCalls,
       rpcCalls,
+      mutations,
       warnings,
       errors,
       disposed: false,

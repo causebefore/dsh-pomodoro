@@ -4,7 +4,7 @@ import { registerHooks } from "node:module";
 
 // Node 半边需要同时兼容 rc.2 的顶层 helper 与 alpha.2 的 provider 方法。
 // 包私有 /pomodoro RPC 只承担 config.read 降级：settings 存在时返回三层
-// 解析值，缺席或卸载时退回组合 entry。CI 仍保持零依赖。
+// 解析值，缺席或卸载时退回组合 entry。旧宿主接口用隔离 mock 验证。
 
 const mockModuleUrl = (source) => "data:text/javascript," + encodeURIComponent(source);
 

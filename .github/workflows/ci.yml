@@ -35,8 +35,14 @@ jobs:
           node-version: "24"
           package-manager-cache: false
 
+      - name: Install test dependencies
+        run: npm ci --ignore-scripts --legacy-peer-deps
+
       - name: Check JavaScript syntax
         run: npm run check
+
+      - name: Security scan
+        run: node scripts/security-scan.mjs
 
       - name: Verify package contents
         run: npm pack --dry-run

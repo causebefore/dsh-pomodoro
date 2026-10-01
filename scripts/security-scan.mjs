@@ -29,6 +29,7 @@ const note = (rule, where, detail) => findings.push({ level: "INFO", rule, where
 const PUBLISHED = [
   "lib/index.js",
   "lib/client.js",
+  "lib/migrate-settings.js",
   "cordis.patch.yml",
   "README.md",
   "README.zh.md",
@@ -90,9 +91,11 @@ const LINE_RULES = [
   },
   {
     rule: "fs/node-module",
-    pattern: /require\s*\(\s*["'](node:)?fs["']\]|from\s+["'](node:)?fs["']/,
+    pattern: /require\s*\(\s*["'](node:)?fs(?:\/promises)?["']\)|from\s+["'](node:)?fs(?:\/promises)?["']/,
     level: "FAIL",
     detail: "Node 文件系统模块引入",
+    // 只允许迁移模块的精确只读导入；写入由宿主 configEditor 执行。
+    exempt: (file, line) => file === "lib/migrate-settings.js" && line === 'import { readFile } from "node:fs/promises";',
   },
   {
     rule: "cred/access",
@@ -249,13 +252,13 @@ for (const [file, content] of Object.entries(sources)) {
 // 2e. package.json 供应链检查（#2215 plugin_vet / #1770 typosquat 维度）。
 {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  const trusted = (name) => name.startsWith("@deepseek-ai/") || name === "react" || name === "react-dom";
+  const trusted = (name) => name.startsWith("@deepseek-ai/") || name === "react" || name === "react-dom" || name === "yaml";
   const deps = { ...pkg.dependencies, ...pkg.peerDependencies };
   const untrusted = Object.keys(deps).filter((name) => !trusted(name));
   if (untrusted.length > 0) {
     fail("supplychain/dependency-allowlist", "package.json", `依赖超出官方域允许列表 :: ${untrusted.join(", ")}`);
   } else {
-    note("supplychain/dependency-allowlist", "package.json", `全部依赖属官方域（@deepseek-ai/* / react）：${Object.keys(deps).length} 个`);
+    note("supplychain/dependency-allowlist", "package.json", `全部依赖在已审查清单（@deepseek-ai/* / react / yaml）：${Object.keys(deps).length} 个`);
   }
 
   const installScripts = ["preinstall", "install", "postinstall"];
@@ -269,7 +272,7 @@ for (const [file, content] of Object.entries(sources)) {
     note("supplychain/lifecycle-scripts", "package.json", "无安装期生命周期脚本");
   }
 
-  const requiredFiles = ["lib/index.js", "lib/client.js", "cordis.patch.yml"];
+  const requiredFiles = ["lib/index.js", "lib/client.js", "lib/migrate-settings.js", "cordis.patch.yml"];
   const missingFromFiles = requiredFiles.filter((f) => !pkg.files?.includes(f));
   const missingOnDisk = (pkg.files ?? []).filter((f) => !existsSync(join(root, f)));
   if (missingFromFiles.length > 0) {
