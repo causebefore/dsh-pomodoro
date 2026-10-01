@@ -59,8 +59,17 @@
 ### 设置页面
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings.png" alt="DSH 插件配置中的番茄钟设置卡片" width="580">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-light-zh.jpg" alt="DSH 插件详情页中的番茄钟设置，浅色主题" width="800">
 </p>
+
+<details>
+<summary>深色主题设置页面</summary>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-dark-zh.jpg" alt="深色主题下的番茄钟插件设置" width="800">
+</p>
+
+</details>
 
 ## 功能亮点
 
@@ -118,7 +127,7 @@ dsh web
 
 ## 设置与提醒
 
-在 DSH 的“设置 → 插件 → 插件配置 → 番茄钟”中展开卡片即可修改：
+新版 DSH：从侧栏进入“插件 → dsh-pomodoro”，展开“番茄钟”卡片。旧版 DSH：进入“设置 → 插件 → 插件配置 → 番茄钟”。可修改以下六项设置：
 
 | 设置 | 默认值 | 作用 |
 |---|---:|---|
@@ -130,6 +139,14 @@ dsh web
 | 后台时发送系统通知 | 关闭 | DSH 页面位于后台时发送浏览器通知 |
 
 当前阶段尚未开始时，新时长会立即生效；计时已经开始后，从下一阶段生效。
+
+### 旧设置迁移
+
+升级到新版设置宿主后，插件会自动读取 `$DSH_HOME/settings.yaml`（不存在时读取 `settings.yaml.imported`）中的 `dsh-pomodoro` 分节。只迁移上表六个有效字段，并且只补充新版配置中尚未明确设置的字段；原文件保持不变，无效字段会跳过并在宿主日志中提示。
+
+迁移结果和内部完成标记由宿主一次写入。点击“清除自定义设置”会恢复继承的配置，不会在重启后再次导入旧值。迁移读取或写入失败时，现有配置保持不变；修复旧文件的格式或权限后重启重试，也可以在插件详情页重新设置。
+
+新版保存与清除均一次提交六项变更。若发生并发修改或写入失败，界面会显示错误并保留草稿，请核对最新设置后重试。
 
 ### 完成提醒
 
@@ -160,6 +177,8 @@ dsh plugin --profile web remove dsh-pomodoro
 | 安装或更新时报 `'pnpm' 不是内部或外部命令` | `dsh plugin` 依赖 PATH 上的 pnpm：执行 `npm install -g pnpm` 后重试 |
 | `dsh web` 启动失败，提示端口 3080 被占用 | 上一个实例仍在运行或已残留：用 `netstat -ano \| findstr :3080` 找到 PID，`taskkill /PID <pid> /F` 结束后重启 |
 | 侧栏没有 🍅 按钮 | 确认使用 `web` profile 且已执行 `dsh plugin --profile web add dsh-pomodoro`，然后重启 `dsh web` |
+| 找不到旧设置入口 | 新版入口为侧栏“插件 → dsh-pomodoro”；旧版仍在“设置 → 插件 → 插件配置” |
+| 升级后旧设置未导入 | 检查宿主日志中的 `dsh-pomodoro` 迁移诊断；修复旧文件格式或权限后重启，或在插件页重新设置 |
 | 系统通知不出现 | 检查浏览器站点通知权限并保持 DSH 页面打开，详见[完成提醒](#完成提醒) |
 
 ## 相关链接
@@ -195,6 +214,7 @@ npm pack --dry-run
 | 路径 | 职责 |
 |---|---|
 | `lib/index.js` | Node/Cordis 入口、官方设置分节与只读配置降级通道（新宿主 GET 路由 / 老宿主 loopback RPC） |
+| `lib/migrate-settings.js` | 旧设置的受限读取、字段校验及一次性迁移 |
 | `lib/client.js` | 浏览器计时引擎、React UI、slot 注册、locale 文案和设置同步 |
 | `assets/sounds/deep-ding.mp3` | CC0 低沉提示音源文件；运行时字节嵌入客户端 bundle |
 | `docs/images/` | 中英文 README 截图与 GitHub Social Preview 图片 |
