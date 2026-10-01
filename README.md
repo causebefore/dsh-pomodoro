@@ -59,8 +59,17 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 ### Settings
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-en.png" alt="Pomodoro settings card in DSH plugin settings" width="580">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-light-en.jpg" alt="Pomodoro settings in the DSH plugin detail page, light theme" width="800">
 </p>
+
+<details>
+<summary>Settings in the dark theme</summary>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/causebefore/dsh-pomodoro/main/docs/images/pomodoro-settings-dark-en.jpg" alt="Pomodoro plugin settings in the dark theme" width="800">
+</p>
+
+</details>
 
 ## Highlights
 
@@ -118,7 +127,7 @@ Click the sidebar 🍅 button to open or close the panel. Drag the title bar to 
 
 ## Settings and Notifications
 
-Open **Settings → Plugins → Plugin configuration → Pomodoro** in DSH to configure:
+On newer DSH hosts, open **Plugins → dsh-pomodoro** from the sidebar and expand **Pomodoro**. On older hosts, use **Settings → Plugins → Plugin configuration → Pomodoro**. Both provide the same six settings:
 
 | Setting | Default | Behavior |
 |---|---:|---|
@@ -130,6 +139,14 @@ Open **Settings → Plugins → Plugin configuration → Pomodoro** in DSH to co
 | Send system notifications in the background | Off | Send a browser notification while the DSH page is in the background |
 
 If the current phase has not started, a new duration takes effect immediately. Once timing has started, the new duration applies from the next phase.
+
+### Migrating older settings
+
+On hosts with the newer settings system, the plugin automatically reads the `dsh-pomodoro` section of `$DSH_HOME/settings.yaml`, falling back to `settings.yaml.imported` when the original is absent. It imports only the six valid fields listed above and only fills fields that are not explicitly configured in the newer configuration. The original file is preserved; invalid fields are skipped with a diagnostic in the host log.
+
+The host saves the imported values and an internal completion marker in one write. **Clear custom settings** restores inherited values without importing old values again after a restart. If reading or writing fails, existing configuration is preserved. Fix the old file format or permissions and restart to retry, or configure the plugin from its detail page.
+
+On newer hosts, saving and clearing each use one atomic update. A concurrent change or failed write displays an error and preserves your draft; review the current settings before retrying.
 
 ### Completion feedback
 
@@ -160,6 +177,8 @@ Restart `dsh web` after either command.
 | `'pnpm' is not recognized` during install or update | `dsh plugin` forwards to pnpm on PATH: run `npm install -g pnpm` and retry |
 | `dsh web` fails to start because port 3080 is in use | A previous instance is still running: find the PID with `netstat -ano \| findstr :3080`, end it with `taskkill /PID <pid> /F`, then restart |
 | No 🍅 button in the sidebar | Confirm you are on the `web` profile and ran `dsh plugin --profile web add dsh-pomodoro`, then restart `dsh web` |
+| The previous settings entry is missing | On newer hosts, use sidebar **Plugins → dsh-pomodoro**; older hosts retain **Settings → Plugins → Plugin configuration** |
+| Older settings were not imported | Check the `dsh-pomodoro` migration diagnostic in the host log; fix the old file format or permissions and restart, or configure the plugin from its detail page |
 | System notifications never arrive | Check browser notification permission and keep the DSH page open; see [Completion feedback](#completion-feedback) |
 
 ## Links
@@ -195,6 +214,7 @@ The project has no build step: `lib/client.js` is the browser bundle that is pub
 | Path | Responsibility |
 |---|---|
 | `lib/index.js` | Node/Cordis entry point, official settings section, and the read-only config fallback channel (GET route on current hosts / loopback RPC on older hosts) |
+| `lib/migrate-settings.js` | Restricted legacy settings reads, validation, and one-time migration |
 | `lib/client.js` | Browser timer engine, React UI, slot registration, locale messages, and settings synchronization |
 | `assets/sounds/deep-ding.mp3` | Source for the CC0 completion sound; its runtime bytes are embedded in the client bundle |
 | `docs/images/` | Chinese and English README screenshots plus the GitHub Social Preview image |

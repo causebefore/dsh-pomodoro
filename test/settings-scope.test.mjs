@@ -149,3 +149,49 @@ test("只读 settingsScope 拒绝保存", async () => {
   );
   tab.dispose();
 });
+
+for (const modernSettings of [true]) {
+  test("configForms：六字段一次原子保存，清除也只提交一次", async () => {
+    const { tab } = await readyTab({ modernSettings });
+    await tab.api.settings.save(VALUE, 1);
+    assert.deepEqual(tab.api.settings.getSnapshot().value, VALUE);
+    assert.equal(tab.api.settings.getSnapshot().revision, 2);
+    assert.equal(tab.mutations.length, 1);
+    assert.equal(tab.mutations[0].ops.length, 6);
+    assert.equal(tab.mutations[0].expectedRevision, 1);
+    await tab.api.settings.reset(2);
+    assert.equal(tab.mutations.length, 2);
+    assert.equal(tab.api.settings.getSnapshot().revision, 3);
+    assert.deepEqual(tab.api.settings.getSnapshot().user, {});
+    tab.dispose();
+  });
+
+  test("configForms：拒绝批量保存时没有部分字段成功", async () => {
+    const { tab } = await readyTab({ modernSettings, settingsWriteRejected: "breakMinutes" });
+    await assert.rejects(() => tab.api.settings.save(VALUE, 1), { code: "SETTINGS_WRITE_REJECTED" });
+    assert.equal(tab.api.settings.getSnapshot().user, null);
+    assert.equal(tab.api.settings.getSnapshot().value.focusMinutes, 25);
+    tab.dispose();
+  });
+
+  test("configForms：提交期间的并发修改报告冲突，不覆盖新值", async () => {
+    const { tab } = await readyTab({ modernSettings, concurrentSettingsWrite: true });
+    await assert.rejects(() => tab.api.settings.save(VALUE, 1), { code: "SETTINGS_CONFLICT" });
+    assert.equal(tab.api.settings.getSnapshot().user, null);
+    assert.equal(tab.mutations[0].expectedRevision, 1);
+    tab.dispose();
+  });
+
+  test("configForms：旧服务不存在仍加载新版卡片，卸载移除全部入口", async () => {
+    const { tab, environment } = await readyTab({ modernSettings });
+    assert.equal(tab.api.isRuntimeReady(), true);
+    assert.equal(environment.slotRegistrations.filter((row) => row.name === "plugins.bundle.config").length, 1);
+    assert.equal(environment.slotRegistrations.some((row) => row.name === "settings.plugin.item"), false);
+    tab.dispose();
+    assert.equal(environment.slotRegistrations.length, 0);
+    const second = environment.createTab({ modernSettings });
+    await environment.flush();
+    assert.equal(environment.slotRegistrations.filter((row) => row.name === "sidebar.footer.action").length, 1);
+    second.dispose();
+  });
+}

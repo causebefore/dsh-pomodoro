@@ -1,7 +1,7 @@
 {
   "name": "dsh-pomodoro",
   "description": "A DeepSeek Harness Web Pomodoro plugin with configurable focus and break intervals, sidebar access, and a draggable floating panel",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/causebefore/dsh-pomodoro.git"
@@ -22,8 +22,8 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test test/runtime-persistence.test.mjs test/slot-registration.test.mjs test/index-rpc.test.mjs test/package-compat.test.mjs test/panel-position.test.mjs test/settings-scope.test.mjs",
-    "check": "node --check lib/index.js && node --check lib/client.js && npm test",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check lib/index.js && node --check lib/client.js && node --check lib/migrate-settings.js && npm test",
     "prepublishOnly": "npm run check"
   },
   "exports": {
@@ -59,18 +59,24 @@
     "node": "^22.19.0 || >=24.0.0"
   },
   "dependencies": {
-    "@deepseek-ai/schemastery": "^3.18.1"
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "yaml": "^2.8.1"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.5-0"
+    "@deepseek-ai/dsh-settings": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.5-0 || ^0.2.0-rc.2"
   },
   "files": [
     "lib/index.js",
     "lib/client.js",
+    "lib/migrate-settings.js",
     "cordis.patch.yml",
     "README.zh.md",
     "THIRD_PARTY_NOTICES.md"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "react": "^18.3.1",
+    "react-test-renderer": "^18.3.1"
+  }
 }
