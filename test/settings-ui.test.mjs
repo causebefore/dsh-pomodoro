@@ -18,6 +18,13 @@ async function mountSettings(t, options = {}) {
   return { environment, tab, view, button, focus, notification };
 }
 
+test("新版设置不可用时不再声称远程浏览器不支持持久化", async (t) => {
+  const ui = await mountSettings(t, { isLoopback: false, settingsUnavailable: true });
+  const rendered = JSON.stringify(ui.view.toJSON());
+  assert.match(rendered, /settings\.unavailable/);
+  assert.doesNotMatch(rendered, /settings\.remoteUnavailable/);
+});
+
 for (const [scenario, options, message] of [
   ["并发冲突", { concurrentSettingsWrite: true }, "settings.conflict.save.withDraft"],
   ["写入失败", { settingsWriteRejected: true }, "notice.save.failed"],
