@@ -16,6 +16,52 @@ async function waitUntilReady(environment, tab) {
   await environment.flush();
 }
 
+test("远程 configForms：过期恢复等待宿主配置，不以默认值自动开始休息", async () => {
+  const environment = createSharedEnvironment(2000);
+  environment.seed(runtimeSnapshot({ running: true, deadlineAt: 1500, updatedAt: 1000 }));
+  const settings = new Deferred();
+  const tab = environment.createTab({ modernSettings: true, isLoopback: false, settingsRead: settings.promise });
+  await environment.flush();
+  assert.equal(tab.api.isRuntimeReady(), false);
+  assert.equal(environment.read().pomos, 0);
+  settings.resolve({ breakMinutes: 10, autoStartBreaks: false });
+  await waitUntilReady(environment, tab);
+  assert.equal(environment.read().phase, "break");
+  assert.equal(environment.read().running, false);
+  assert.equal(environment.read().totalMs, 10 * 60 * 1000);
+  assert.equal(environment.read().pomos, 1);
+  assert.equal(tab.completions.length, 1);
+  assert.equal(tab.rpcCalls.length, 0);
+  assert.equal(tab.fetchCalls.length, 0);
+  tab.dispose();
+});
+
+test("远程 configForms：首次设置到达前的开始操作采用宿主时长", async () => {
+  const environment = createSharedEnvironment();
+  const settings = new Deferred();
+  const tab = environment.createTab({ modernSettings: true, isLoopback: false, settingsRead: settings.promise });
+  const start = tab.api.engine.toggleRun();
+  await environment.flush();
+  assert.equal(environment.read(), null);
+  settings.resolve({ focusMinutes: 35 });
+  await start;
+  await waitUntilReady(environment, tab);
+  assert.equal(environment.read().running, true);
+  assert.equal(environment.read().totalMs, 35 * 60 * 1000);
+  tab.dispose();
+});
+
+test("远程 configForms 不可用时仍能按默认时长开始计时", async () => {
+  const environment = createSharedEnvironment();
+  const tab = environment.createTab({ modernSettings: true, isLoopback: false, settingsUnavailable: true });
+  await waitUntilReady(environment, tab);
+  await tab.api.engine.toggleRun();
+  assert.equal(environment.read().running, true);
+  assert.equal(environment.read().totalMs, 25 * 60 * 1000);
+  assert.equal(tab.rpcCalls.length, 0);
+  tab.dispose();
+});
+
 test("刷新后沿用原绝对截止时间，不在 tick 中重复写入", async () => {
   const environment = createSharedEnvironment(100000);
   environment.seed(runtimeSnapshot({
