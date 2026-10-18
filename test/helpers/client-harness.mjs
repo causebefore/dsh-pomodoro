@@ -214,7 +214,7 @@ export function createSharedEnvironment(initialNow = 100000) {
           user: undefined,
           revision: undefined,
           writable: false,
-          mode: "host",
+          ...(!options.modernSettings ? { mode: "host" } : {}),
         }
       : {
           status: "loading",
@@ -223,7 +223,7 @@ export function createSharedEnvironment(initialNow = 100000) {
           user: undefined,
           revision: undefined,
           writable: options.settingsWritable !== false,
-          mode: "host",
+          ...(!options.modernSettings ? { mode: "host" } : {}),
         };
     const publishSettings = () => {
       settingsSnapshot = {
@@ -233,7 +233,7 @@ export function createSharedEnvironment(initialNow = 100000) {
         user: settingsUser === null ? null : { ...settingsUser },
         revision: settingsRevision,
         writable: options.settingsWritable !== false,
-        mode: "host",
+        ...(!options.modernSettings ? { mode: "host" } : {}),
       };
       for (const listener of settingsListeners) listener();
     };

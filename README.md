@@ -140,6 +140,8 @@ On newer DSH hosts, open **Plugins → dsh-pomodoro** from the sidebar and expan
 
 If the current phase has not started, a new duration takes effect immediately. Once timing has started, the new duration applies from the next phase.
 
+On newer DSH hosts that persist remote settings, authenticated remote browsers can also save and clear them. On initial page load, Pomodoro waits for the host settings before starting a timer or settling a phase that expired while the page was closed, avoiding default durations or automatic-start options. Older hosts without remote settings continue to use the defaults.
+
 ### Migrating older settings
 
 On hosts with the newer settings system, the plugin automatically reads the `dsh-pomodoro` section of `$DSH_HOME/settings.yaml`, falling back to `settings.yaml.imported` when the original is absent. It imports only the six valid fields listed above and only fills fields that are not explicitly configured in the newer configuration. The original file is preserved; invalid fields are skipped with a diagnostic in the host log.
@@ -169,6 +171,8 @@ dsh plugin --profile web remove dsh-pomodoro
 ```
 
 Restart `dsh web` after either command.
+
+The plugin declares its compatibility range through `engines.dsh` for newer hosts and retains peer dependency declarations for older hosts. Each Release lists the rc versions actually tested and the scope of that verification.
 
 ## Troubleshooting
 
