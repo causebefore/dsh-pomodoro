@@ -107,6 +107,8 @@ dsh web
 
 The plugin is loaded when the 🍅 button appears at the bottom of the sidebar.
 
+On hosts with a More menu, Pomodoro still opens from the 🍅 button at the bottom of the sidebar. Panel pinning options in More do not move this button.
+
 ### Install from the DSH UI
 
 Prefer staying in the Web UI? Two community companions can install this plugin for you:
