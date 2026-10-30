@@ -1,23 +1,26 @@
 # v0.5.6 验证记录
 
-日期：2026-10-24。目标 DSH `0.2.1-rc.3`，官方标签 `dsh-v0.2.1-rc.3`，提交 `1f81c047fc48fa190a683e469daa699857e9afe8`，GitHub 发布时间 `2026-10-23T15:26:39Z`。检查范围为上次已验证的 `0.2.1-rc.2` 至目标 rc 的发布说明、升级指南和源码差异；上游在精确标签的独立工作树中检查。
+日期：2026-10-29。目标 DSH `0.2.1-rc.4`，官方标签 `dsh-v0.2.1-rc.4`，提交 `504a01a9578abc2c6f1fb896b1dc322c9fe24f66`，GitHub 发布时间 `2026-10-28T02:49:58Z`。检查范围为最近已完成发布适配的 `0.2.1-rc.2` 至目标 rc 的累计发布说明、升级指南和源码差异；上游在精确标签的独立工作树中检查。
+
+本候选于 2026-10-24 已验证 `0.2.1-rc.3`（标签 `dsh-v0.2.1-rc.3`，提交 `1f81c047fc48fa190a683e469daa699857e9afe8`，发布时间 `2026-10-23T15:26:39Z`），因 GitHub 认证阻塞未发布。本轮沿用尚未发布的 v0.5.6，追加 rc.4 验证；两个候选 tarball 的 SHA-512 完全一致。
 
 ## 接口影响与本次变更
 
 | 插件使用面 | 检查结果 |
 | --- | --- |
-| Cordis / Loader、schemastery、settings / configForms、configEditor / 旧设置迁移 | 对应实现无本次实质变更；保留既有注入、effect 清理、六字段原子保存和迁移行为。 |
+| Cordis / Loader、schemastery、settings / configForms、configEditor / 旧设置迁移 | 对应实现从 rc.2 至 rc.4 无本次实质变更；保留既有注入、effect 清理、六字段原子保存和迁移行为。 |
 | connection / fetch / RPC / 认证、客户端模块加载、locale | 本插件使用的接口无本次实质变更；正式宿主正常认证、加载及中英文切换通过。 |
-| slots / 侧栏 | 新增 `sidebar.panellist.actions` 等“更多”菜单扩展，管理面板列表；本插件的 `sidebar.footer.action`、`shell.overlay` 和 `plugins.bundle.config` 未变。底部番茄钟入口与新菜单共存，无需换用新的 slot。 |
-| UI primitives | Menu 增加可选属性，Tooltip 优化摆放；本插件仅直接使用该包的 Toast，未使用变动组件。 |
-| 插件安装器、engines.dsh / settings peer、客户端注入声明 | 现有 `^0.2.1-rc.2` 已按 SemVer 包含 `0.2.1-rc.3`，最低支持范围不变；无需新增范围或豁免版本检查。正常 tarball 安装和禁用/启用通过。 |
-| 升级指南中的新会话复用、模型目录更新 | 本插件不调用会话创建或模型目录接口，无适配改动。 |
+| slots / 侧栏 | rc.3 新增 `sidebar.panellist.actions` 等“更多”菜单扩展，管理面板列表；本插件的 `sidebar.footer.action`、`shell.overlay` 和 `plugins.bundle.config` 至 rc.4 未变。底部番茄钟入口与新菜单共存，无需换用新的 slot。 |
+| UI primitives / 会话界面 | rc.3 的 Menu 可选属性与 Tooltip 摆放调整不影响本插件直接使用的 Toast；rc.4 仅调整会话标签溢出提示、“更多”菜单文案及相关 locale，未改动本插件使用的 UI primitives。 |
+| 插件安装器、engines.dsh / settings peer、客户端注入声明 | 现有 `^0.2.1-rc.2` 已按 SemVer 包含 `0.2.1-rc.3` 和 `0.2.1-rc.4`，最低支持范围不变；无需新增范围或豁免版本检查。正常 tarball 安装和禁用/启用通过。 |
+| ACP / MCP | rc.4 发布说明修复 ACP 诊断输出污染 stdout；源码将账户日志改写 stderr，并在 MCP 服务端没有资源能力时跳过列资源请求。本插件不调用这些接口，无需适配。 |
+| 升级指南、包版本 | rc.3 的新会话复用和模型目录接口未被本插件调用；rc.4 未新增升级指南，变动的 package.json 除 rc 版本替换外无其他变化。 |
 
 本次没有修改运行时代码、依赖或 bundle patch。补丁版本用于记录新 rc 的实测结果，中英文 README 补充新“更多”菜单与番茄钟底部入口的区别，不虚构功能修复。
 
 ## 自动化与发布产物
 
-- `npm ci --ignore-scripts --legacy-peer-deps` 后运行 `npm run check`：70 / 70 通过，无跳过；仅同步原有版本断言，未新增测试数量。
+- 2026-10-29 重新执行 `npm ci --ignore-scripts --legacy-peer-deps` 后运行 `npm run check`：70 / 70 通过，无跳过；候选沿用此前同步的版本断言，本轮未新增测试或修改运行时代码。
 - `node scripts/security-scan.mjs`：0 FAIL / 0 WARN / 9 INFO。
 - `npm audit --json`：0 vulnerabilities。
 - `npm pack --dry-run`、`npm publish --dry-run` 均通过。9 个发布文件与白名单一致，不包含测试、验证记录、截图、日志、凭据或 DSH 配置；未执行本地真实 npm 发布。
@@ -30,11 +33,11 @@
 
 | DSH | 本轮范围 | 结果 |
 | --- | --- | --- |
-| 0.2.1-rc.3 | 安装/加载、侧栏与设置、保存/清除、自然循环、暂停/跳过/重置、刷新/重启、禁用/启用、界面检查 | 通过，未验证项见下文 |
-| 0.2.1-rc.2 | 安装/加载、插件详情与设置入口、保存 30 分钟、开始/暂停/跳过/重置 | 通过 |
+| 0.2.1-rc.4 | 安装/加载、侧栏与设置、保存/清除、自然循环、暂停/跳过/重置、刷新/重启、禁用/启用、界面检查 | 通过，未验证项见下文 |
+| 0.2.1-rc.3 | 安装/加载、插件详情与设置入口、保存 30 分钟、开始/暂停/跳过/重置 | 通过 |
 | 0.1.0-rc.7 | 安装/加载、侧栏面板、25 分钟开始/暂停、跳过进入 5 分钟休息 | 通过 |
 
-其他 rc 本轮未重新测试，历史记录见 [v0.5.5](validation-v0.5.5.zh.md) 与更早验证文档。
+`0.2.1-rc.2` 于 2026-10-24 使用相同 SHA-512 的 v0.5.6 候选完成安装、设置保存 30 分钟及开始/暂停/跳过/重置冒烟，本轮未重复执行；rc.3 的完整宿主验证也于该日通过。其他 rc 本轮未重新测试，历史记录见 [v0.5.5](validation-v0.5.5.zh.md) 与更早验证文档。
 
 ### 目标宿主操作证据
 
@@ -55,5 +58,7 @@
 
 ## 截图
 
-- [中文浅色与休息阶段](images/validation-v0.5.6-zh-light.png)
-- [英文深色、拖动后面板与键盘焦点](images/validation-v0.5.6-en-dark.png)
+- [rc.4 中文浅色](images/validation-v0.5.6-rc4-zh-light.jpg)
+- [rc.4 英文深色](images/validation-v0.5.6-rc4-en-dark.jpg)
+- [rc.4 重启后默认设置与暂停计时恢复](images/validation-v0.5.6-rc4-restart.jpg)
+- 2026-10-24 rc.3 历史截图：[中文浅色](images/validation-v0.5.6-zh-light.png)、[英文深色](images/validation-v0.5.6-en-dark.png)
