@@ -61,7 +61,7 @@
 
 系统通知开启时的浏览器授权与操作系统送达、提示音实际可听性、跨机器网络/TLS、远程设置路径，以及安装器新回滚功能本轮未实测。没有持续采集整轮浏览器 console；不声明零前端错误。其他 rc 的旧候选验证见历史提交，本轮新包仅声明上表三个已实测版本。
 
-本记录对应本地候选包。GitHub CLI 认证仍不可用，尚未推送、创建发布 PR、执行该提交的必需 CI、合并 main、创建正式 Release 或触发 npm Trusted Publishing；从 npm 正式包重新安装的发布后冒烟亦未执行。恢复入口与发布草稿保存在工作区 `.validation/rc-maintenance/state.json`。完成完整发布核验前，不把目标 rc 标记为已发布适配。
+本记录对应本地候选包。GitHub CLI 认证仍不可用；已连接的 GitHub 工具可读，但写入 blob 返回 `403 Resource not accessible by integration`，未形成远端修改。尚未推送、创建发布 PR、执行该提交的必需 CI、合并 main、创建正式 Release 或触发 npm Trusted Publishing；从 npm 正式包重新安装的发布后冒烟亦未执行。恢复入口与发布草稿保存在工作区 `.validation/rc-maintenance/state.json`。完成完整发布核验前，不把目标 rc 标记为已发布适配。
 
 ## 截图
 
