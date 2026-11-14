@@ -86,7 +86,7 @@
 
 | 组件 | 要求 |
 |---|---|
-| DeepSeek Harness | v0.5.6 候选已验证 `0.2.2-rc.3`、`0.2.2-rc.2`、`0.1.0-rc.7`；范围及发布状态见[验证记录](docs/validation-v0.5.6.zh.md) |
+| DeepSeek Harness | v0.5.6 已实测 `0.2.2-rc.3`、`0.2.2-rc.2`、`0.1.0-rc.7`；验证范围见[验证记录](docs/validation-v0.5.6.zh.md) |
 | Node.js | 插件支持 `^22.19.0` 或 `>=24.0.0`；DSH 0.2.2 rc 宿主要求 `>=24.9.0` |
 | DSH profile | `web`；headless profile 不提供界面 |
 | pnpm | 可从命令行使用 |
