@@ -1,76 +1,71 @@
 # v0.5.6 验证记录
 
-日期：2026-11-13。目标 DSH `0.2.2-rc.2`，官方标签 `dsh-v0.2.2-rc.2`，提交 `ddac96760b6edf8fa0fe17cbdcf0b512f4c12b2c`。GitHub Release 发布时间 `2026-11-11T11:33:06Z`，npm 正式分发发布时间 `2026-11-12T02:16:12.076Z`。此前仅有 GitHub Release，11 月 13 日确认 npm 精确版本可用后才开展宿主验证。没有把 alpha、npm latest 或 master 当作本次发布基线。
+日期：2026-11-14。目标 DSH `0.2.2-rc.3`，官方标签 `dsh-v0.2.2-rc.3`，提交 `38a6a5c965aa99ab525161efb7cc5cf1fe62fced`。GitHub Release 发布时间 `2026-11-13T07:56:55Z`；npm 精确分发包发布时间 `2026-11-13T08:05:45.455Z`。使用独立精确标签检出及正式 npm 分发包，没有采用 master、alpha 或 npm latest 代替目标版本。
 
-最近已发布适配基线仍为插件 v0.5.5 / DSH `0.2.1-rc.2`。此前 rc.3、rc.4、rc.5 和 `0.2.2-rc.1` 候选未发布，本轮复用 v0.5.6。已阅读累计 Release notes、升级指南及精确标签源码差异。本轮未新增运行时代码修改，保留此前候选中必要的 Loader 迁移修复及兼容范围；新增的是 rc.2 实测、双语兼容性说明和截图。
+最近已发布适配基线仍为插件 v0.5.5 / DSH `0.2.1-rc.2`。本轮复用尚未发布的 v0.5.6 候选及累计变更审查结果，保留 Loader 包装 Fiber 的迁移修复、旧 Fiber 支持及兼容范围。rc.3 未发现需要新增运行时代码的契约变化，本轮实际变更为双语兼容说明及验证记录。
 
-## 接口影响与变更
+## 接口影响
 
-| 插件使用面 | 累计影响及本轮结果 |
+| 插件使用面 | 累计影响及 rc.2 → rc.3 结果 |
 | --- | --- |
-| Cordis / Loader 生命周期 | 0.2.2-rc.1 引入 Cordis 4.1.0 / Loader 1.1.0，配置行 Fiber 变为可等待包装。候选通过 `candidate.fiber?.ctx.fiber === ctx.fiber` 定位运行实例，修复旧设置迁移找不到配置行的问题；保留旧版直接 Fiber 支持。rc.2 未进一步更改相关实现。 |
-| settings / configForms / configEditor | 保留六字段原子保存、清除、显式配置优先及一次性迁移标记。rc.1 的 owner 归一化、effectiveConfig、EntryTree.commit / journal 更改不要求插件直接调用内部接口；rc.2 没有新的公开接口差异。两版实测保存、清除和重启通过。 |
-| schemastery | 3.19.0 在 rc.1 至 rc.2 间未变，现有范围覆盖；保留 volatile 字段 `.get()`，不升级插件依赖。 |
-| connection / fetch / RPC / 认证 | reviewed connection、frontend-static、webserver 路径未见 rc.2 相关契约变化。真实宿主采用正常 loopback 认证，未改变用户安装或认证边界。 |
-| 客户端模块加载 | rc.2 隔离初始配置行创建异常，对可选未激活客户端条目发出警告而非使整个页面失败。本轮确认番茄钟组件实际运行、入口和设置存在，未把页面打开当作插件加载成功。 |
-| slots / 侧栏 / locale | 新增 hoc slot、侧栏图标 factory 和滚动/固定布局；本插件使用的 `sidebar.footer.action` list / wide、`shell.overlay` 以及 `plugins.bundle.config` keyed 契约保持。侧栏入口、中英文、拖动和恢复实测通过。locale 未见相关实现差异。 |
-| UI primitives | rc.2 的菜单改用 CSS anchors，移除 useAnchoredPosition / Menu.getAnchorRect；本插件仅消费 Toast，不调用被移除接口。Toast 样式使用宿主 alias，本次不引入无关菜单改造。 |
-| 插件安装器 | BundleInfo 的 updatable 变为可选 update，增加 unexpected-package；插件不调用这些管理 API。三版均通过正常 `dsh plugin` 路径安装，未使用版本豁免。 |
-| engines / peers / 客户端声明 | 相对 v0.5.5 增加 `^0.2.2-rc.1`，SemVer 核对覆盖 rc.2；原有范围保留。Cordis `^4.0.1` 和客户端声明继续有效。DSH 0.2.2 rc 要求 Node >=24.9.0，与插件自身要求在 README 中分别说明。 |
-| 先前 0.2.1 rc 累计变化 | 侧栏“更多”、ACP/MCP 日志、资源处理和推理 text/rawText slot 差异未改变本插件所用接口，保留底部番茄钟入口说明。 |
+| Cordis / Loader | 保留 `candidate.fiber?.ctx.fiber === ctx.fiber` 对包装 Fiber 的识别及旧版直接 Fiber 支持；本轮 vendor 无源码变化。 |
+| schemastery / settings / configForms / configEditor | 六字段原子保存、清除、显式值优先及一次性迁移标记继续有效；相关 settings/configEditor 实现未变，仅宿主包版本更新。 |
+| connection / fetch / RPC / 认证 | connection、frontend-static、webserver 相关实现未变；实际安装使用独立 loopback 认证，不改变生产安装和配置。 |
+| 客户端模块加载 / locale | 包版本变化，未见实现变化；真实组件运行、侧栏和设置入口均已确认。 |
+| slots / 侧栏 | 新增 `sidebar.session.action` hoc slot 包裹新会话行，调整该行布局；本插件使用的 `sidebar.footer.action` list / wide、`shell.overlay`、`plugins.bundle.config` keyed 保持。展开/折叠侧栏的番茄钟入口均实测。 |
+| UI primitives | 新增 upload 图标，插件仅使用的 Toast 未变；不依赖此前移除的菜单定位接口。 |
+| 插件安装器 | plugin-manager 实现未变；三版均通过正常 `dsh plugin` 路径安装 tarball，没有版本豁免。 |
+| engines / peers / 客户端声明 | 保留 `^0.2.2-rc.1` 及旧范围；npm 自带 SemVer 核对接受目标 rc.3、上一 rc.2 和最低 rc.7。没有依赖升级或客户端声明变更。 |
+| 新增宿主功能 | 实验性 DeepSeek 对话导入及 Windows 桌面更新修复与本插件无直接调用关系，不加入无关功能。 |
 
-参照目标精确标签的 `docs/user/develop/basic/publish.zh.md`、`docs/upgrade-guide/v0.2.2-alpha.2/css-anchored-menus/guide.zh.md`、`docs/upgrade-guide/v0.2.2-rc.1/plugin-update-method/guide.zh.md`，以及此前 Loader entry-tree 升级指南。指南目录名不作为发布基线。
+复核累计记录和升级指南；本轮精确标签间 `docs/upgrade-guide` 无差异，并阅读目标标签的 `docs/user/develop/basic/publish.zh.md`。完整影响清单保存在工作区 `.validation/rc-maintenance/0.2.2-rc.3/api-impact.json`。
 
-## 自动化和打包
+## 自动化与打包
 
-- `npm ci --ignore-scripts --legacy-peer-deps` 后运行 `npm run check`：**72 / 72 通过，0 失败、0 跳过**。包含旧版直接 Fiber、新版包装 Fiber 两项迁移回归；本轮没有新增与实现重复的测试。
+- `npm ci --ignore-scripts --legacy-peer-deps` 后执行 `npm run check`：**72 / 72 通过，0 失败、0 跳过**，包含包装 Fiber / 直接 Fiber 回归。本轮没有新增重复测试。
 - `node scripts/security-scan.mjs`：0 FAIL / 0 WARN / 9 INFO；`npm audit --json`：0 vulnerabilities。
-- `npm pack --dry-run`、`npm publish --dry-run` 均通过，没有本地真实 npm 发布。
-- 最终包 44,936 字节，9 个文件，解包大小 147,630 字节；integrity：`sha512-ZD1hDLXmW2grXEScA6B1pjeVNC5wZVwLNiDR7YE4RYTp8cdOnkv6bhHXxAfbhV2BVP7Q615mDv3kFGC5OPGIwg==`。
-- 清单仅含 LICENSE、两份 README、THIRD_PARTY_NOTICES.md、cordis.patch.yml、三个 lib 文件及 package.json；没有测试配置、日志、截图、凭据或验证记录。
-- 环境：macOS、Node 26.10.0、pnpm 11.25.0。目标运行时锁定官方 `@deepseek-ai/dsh@0.2.2-rc.2`，复用现有明确 allowBuilds 配置，无全局配置或生产安装变更。
+- `npm pack --dry-run`、`npm publish --dry-run` 均通过；没有本地真实 npm 发布。
+- 最终包 **44,937 字节、9 个文件**，integrity：`sha512-S8oMGUEox8+3PsKzZ2IcP3AgW9vW6ipaSevJliooKuisijDoppGwLVXt5nV6vhIwddPR+S0oB0YC3lxGMftTDQ==`。
+- 发布清单仅含 LICENSE、两份 README、THIRD_PARTY_NOTICES.md、cordis.patch.yml、三个 lib 文件及 package.json，没有日志、截图、测试配置或凭据。
+- macOS / Node 26.10.0 / pnpm 11.25.0；每版独立 DSH_HOME、loopback 端口。浏览器连接器当日不可用，改用本机 Chrome 的独立测试窗口，经原生界面完成操作。
 
 ## 真实宿主验证
 
-三版均使用独立 DSH_HOME 和 loopback 端口，使用精确 npm DSH 发行包，通过 `dsh plugin --profile web add <tarball>` 安装。目标版全量测试先使用与上一候选相同的运行时代码包；更新 README 后重新打包，只改变两份 README。发现 pnpm 对同一路径 tarball 使用旧缓存后，改从 `final/` 的独立产物路径安装，逐文件核对三版安装目录全部 9 个文件与最终包一致，再完成加载/开始/暂停冒烟及目标设置保存/清除。
-
-| DSH | 本轮范围 | 结果 |
+| DSH | 本轮验证范围 | 结果 |
 | --- | --- | --- |
-| 0.2.2-rc.2 | 安装/组件运行、侧栏与设置、六字段保存/清除、自然循环、暂停/跳过/重置、刷新/重启、禁用/启用、旧设置迁移、双语主题与交互；最终包加载/设置/计时冒烟 | 通过 |
-| 0.2.2-rc.1 | 安装/加载、旧设置迁移、保存/清除、开始/暂停/跳过、清除后重启；最终包加载/计时冒烟 | 通过 |
-| 0.1.0-rc.7 | 安装/加载、侧栏面板、开始/暂停/跳过；最终包加载/计时冒烟 | 通过 |
+| 0.2.2-rc.3 | 安装/加载、展开和折叠侧栏入口、六字段保存/清除、自然循环、暂停/跳过/重置、刷新/宿主重启、禁用/启用、迁移、双语主题、拖动、键盘焦点、减少动态效果下迷你切换 | 通过 |
+| 0.2.2-rc.2 | 安装/加载、迁移与显式值保留、保存/清除、开始/暂停/跳过、清除后重启 | 通过 |
+| 0.1.0-rc.7 | 安装/加载、侧栏面板、开始/暂停/跳过、最终包重启冒烟 | 通过 |
 
 ### 设置与迁移
 
-目标版、上一 rc 的合成旧配置为专注 42 / 休息 8、自动休息 false、自动专注 true、提示音和通知 false，同时预置显式休息 11。两版 UI 读取 **42 / 11**，显式值未覆盖；原 settings 文件经宿主改名为 `settings.yaml.imported` 后，与 fixture 逐字节相同。
+目标版及上一 rc 的合成旧配置：专注 42、休息 8、自动休息 false、自动专注 true、声音与通知 false；另预置显式休息 11。两版界面均显示 **42 / 11**，旧值没有覆盖显式配置。`settings.yaml.imported` 与原 fixture 逐字节一致。
 
-目标版保存 **32 / 6、false / true / true / false**，显示已保存，未开始的计时同步为 32:00；清除恢复 **25 / 5、true / false / false / false**。上一 rc 保存专注 30 并清除。两版清除后实际重启，番茄钟 patch 只保留迁移标记 1，没有旧值重新导入。最终包在目标版再次保存专注 30 并清除成功。
+目标保存 **32 / 6、false / true / true / false** 后显示 Saved，未启动计时同步为 32:00。清除后六项恢复 **25 / 5、true / false / false / false**。上一 rc 保存专注 30 并清除通过。两版清除后重启，界面仍显示 25 / 5，番茄钟 patch 仅保留迁移标记 1，没有再次导入旧值。
 
-### 计时与界面
+原生自动化首次用 setValue 填数字框没有形成有效输入，界面正确提示整数范围；改用选中并键盘输入后保存成功。开始循环前确认已保存值并重置为 1:00；不把设置提交仍在传播时启动的旧时长计时算作一分钟验证。
 
-- 目标保存 1 / 1、自动休息和自动专注开启，真实等待专注到期、休息到期，先观察到休息 0:56 / 完成数 1，再观察到下一轮专注 0:55 / 完成数 1；未注入时钟或运行状态。
-- 暂停、跳过为暂停休息 1:00；刷新后重新打开面板，阶段、剩余时间和完成数一致。
-- 禁用时入口和面板均移除；重新启用后只出现一个入口，仍为暂停休息 1:00 / 完成数 1。异步开关在一次工具的即时检查中尚未翻转，随后页面确认已成功；没有重复禁用操作。
-- 清除、重置后首次宿主重启恢复暂停休息 5:00 / 完成数 1；最终包重装前暂停在 4:54，重启后仍为 4:54。上一 rc 完成数 0，最低版完成数 0。最终目标清除并重置为暂停休息 5:00。
-- 中文深色、英文浅色均留图；语言切换保留阶段与完成数。拖动后面板位置改变，Tab 到重置按钮显示清晰焦点环。
-- 临时模拟 prefers-reduced-motion: reduce，读取匹配值 true，面板 transitionDuration 为 0s，迷你/完整切换正常；已恢复原媒体模拟状态。
-- 浮动面板在拖到中央后会遮挡底层设置卡片；关闭浮层后正常展开，符合浮层交互，未修改代码。
-- 三版共九份启动日志未检出错误；浏览器捕获记录无 error，17 条 warn 均为两次受控重启期间的 connection lost/retry（目标 6、上一 rc 6、最低版 5）。不将工具捕获记录解释为完整浏览器日志。
-- 测试标签页已关闭，三个临时宿主已停止，三个端口均关闭。
+### 计时、生命周期与界面
 
-## 未验证项与发布状态
+- 保存 1 / 1、自动休息及自动专注开启，真实等待专注到期，观察 **休息 0:58、完成数 1**；再等待休息到期，观察 **下一轮专注 0:56、完成数仍为 1**，未注入时钟或运行状态。
+- 暂停及跳过后为休息 1:00 / 完成数 1；刷新重新打开面板后保持。禁用移除入口与面板，启用后恢复单个入口及相同暂停状态。
+- 清除后休息为 5:00；最终包重装并重启后仍为暂停休息 5:00 / 完成数 1。上一版及最低版恢复暂停休息 5:00 / 完成数 0。
+- 中文深色、英文浅色、拖动、键盘 Tab 到 Reset 的可见蓝色焦点环均检查并留图。语言切换不重置计时。
+- Chrome Rendering 面板临时设置 `prefers-reduced-motion: reduce`，迷你/完整模式切换正常，之后恢复 No emulation。本轮未读取 computed transitionDuration，不沿用上一轮的 0s 测量结论。
+- 六份宿主启动日志未检出 error / failed / exception。检查目标浏览器控制台时，发现一条来自已有翻译扩展 content.js 的 “Extension context invalidated” 错误；不能据此声称浏览器零错误，也未修改该扩展。本轮未完整采集浏览器日志。
 
-本轮未验证系统通知授权/操作系统送达、提示音实际可听性、跨机器网络/TLS、远程设置路径和安装器回滚。正式 npm 包发布后的独立重装冒烟尚未执行。只声明本轮表中实际验证的三版；其他历史候选证据不能替代本包验证。
+### 最终发布物复验
 
-当前为本地 v0.5.6 候选。GitHub CLI 认证不可用；本轮尝试写入实际验证文档时，连接器再次返回 `403 Resource not accessible by integration`，未形成远端修改。尚未推送、创建发布 PR、执行发布提交必需 CI、合并 main、创建 Release 或触发 npm Trusted Publishing。具体恢复状态保存在工作区 `.validation/rc-maintenance/state.json`，恢复认证后应先重查远端事实再续跑；在发布及正式 npm 包核验完成前，不标记目标 rc 为已发布适配。
+完整宿主测试使用初始候选包。双语 README 更新后重新打包至独立 `final/` 路径，避免 pnpm 同路径缓存复用。核对最终包相对初始包仅两份 README 有变化，三版安装目录的 **全部 9 个文件**与最终 tarball 一致。
 
-## 截图
+三版最终包均完成重启、加载、开始/暂停冒烟；目标版再次保存专注 30 并清除，恢复 25 / 5。最终暂停显示目标休息 4:54、上一版 4:55、最低版 4:56。测试窗口已关闭，临时宿主已停止。
 
-- [中文深色](images/validation-v0.5.6-022rc2-zh-dark.png)
-- [英文浅色](images/validation-v0.5.6-022rc2-en-light.png)
-- [拖动与键盘焦点](images/validation-v0.5.6-022rc2-keyboard-focus.png)
-- [最终包设置与计时](images/validation-v0.5.6-022rc2-restart.png)
-- [上一 rc 最终包冒烟](images/validation-v0.5.6-022rc2-previous-rc1.png)
-- [最低支持版最终包冒烟](images/validation-v0.5.6-022rc2-minimum-rc7.png)
+六张本轮原始截图保存在工作区 `.validation/rc-maintenance/0.2.2-rc.3/screenshots/`：中文深色、英文浅色、拖动/焦点、目标重启、上一版和最低版最终包。本轮未改变插件 UI；截图包含本机 Chrome 工具栏，因此仅保留本地证据，不加入公开仓库及 npm 包。既有公开界面截图保留。
 
-历史候选记录保留于 `33e8906`（rc.3）、`ee95842`（rc.4）、`a232d9f`（rc.5）、`d907c08`（0.2.2-rc.1）；历史截图保留。已发布基线见 [v0.5.5 验证记录](validation-v0.5.5.zh.md)。
+## 限制与发布状态
+
+未验证系统通知授权/操作系统送达、声音实际可听性、跨机器 TLS/远程设置、安装器回滚、完整浏览器日志，以及正式 npm 发布后的独立安装。只声明表中实际验证的三版及范围。
+
+当前为本地 v0.5.6 候选，正式发布仍为 v0.5.5。GitHub CLI 认证不可用；本轮尝试写入实际验证文档时，连接器再次返回 `403 Resource not accessible by integration`，没有形成远端修改。没有新发布 PR、必需 CI、main 服务端合并、Release 或 npm Trusted Publishing 结果。恢复认证后从 `.validation/rc-maintenance/state.json` 复核远端事实并续跑，完成正式 npm 包复验后才能标记 rc.3 已发布适配。
+
+历史候选记录在 `1cbb218`（0.2.2-rc.2）、`d907c08`（0.2.2-rc.1）、`a232d9f`（0.2.1-rc.5）、`ee95842`（0.2.1-rc.4）、`33e8906`（0.2.1-rc.3）；已发布基线见 [v0.5.5 验证记录](validation-v0.5.5.zh.md)。
