@@ -2,7 +2,7 @@
 
 日期：2026-11-14。目标 DSH `0.2.2-rc.3`，官方标签 `dsh-v0.2.2-rc.3`，提交 `38a6a5c965aa99ab525161efb7cc5cf1fe62fced`。GitHub Release 发布时间 `2026-11-13T07:56:55Z`；npm 精确分发包发布时间 `2026-11-13T08:05:45.455Z`。使用独立精确标签检出及正式 npm 分发包，没有采用 master、alpha 或 npm latest 代替目标版本。
 
-最近已发布适配基线仍为插件 v0.5.5 / DSH `0.2.1-rc.2`。本轮复用尚未发布的 v0.5.6 候选及累计变更审查结果，保留 Loader 包装 Fiber 的迁移修复、旧 Fiber 支持及兼容范围。rc.3 未发现需要新增运行时代码的契约变化，本轮实际变更为双语兼容说明及验证记录。
+本次验证的起始发布基线为插件 v0.5.5 / DSH `0.2.1-rc.2`。本轮复用尚未发布的 v0.5.6 候选及累计变更审查结果，保留 Loader 包装 Fiber 的迁移修复、旧 Fiber 支持及兼容范围。rc.3 未发现需要新增运行时代码的契约变化，本轮实际变更为双语兼容说明及验证记录。
 
 ## 接口影响
 
@@ -25,7 +25,7 @@
 - `npm ci --ignore-scripts --legacy-peer-deps` 后执行 `npm run check`：**72 / 72 通过，0 失败、0 跳过**，包含包装 Fiber / 直接 Fiber 回归。本轮没有新增重复测试。
 - `node scripts/security-scan.mjs`：0 FAIL / 0 WARN / 9 INFO；`npm audit --json`：0 vulnerabilities。
 - `npm pack --dry-run`、`npm publish --dry-run` 均通过；没有本地真实 npm 发布。
-- 最终包 **44,937 字节、9 个文件**，integrity：`sha512-S8oMGUEox8+3PsKzZ2IcP3AgW9vW6ipaSevJliooKuisijDoppGwLVXt5nV6vhIwddPR+S0oB0YC3lxGMftTDQ==`。
+- 宿主全量验证对应的打包复验产物 **44,937 字节、9 个文件**，integrity：`sha512-S8oMGUEox8+3PsKzZ2IcP3AgW9vW6ipaSevJliooKuisijDoppGwLVXt5nV6vhIwddPR+S0oB0YC3lxGMftTDQ==`。
 - 发布清单仅含 LICENSE、两份 README、THIRD_PARTY_NOTICES.md、cordis.patch.yml、三个 lib 文件及 package.json，没有日志、截图、测试配置或凭据。
 - macOS / Node 26.10.0 / pnpm 11.25.0；每版独立 DSH_HOME、loopback 端口。浏览器连接器当日不可用，改用本机 Chrome 的独立测试窗口，经原生界面完成操作。
 
@@ -62,10 +62,14 @@
 
 六张本轮原始截图保存在工作区 `.validation/rc-maintenance/0.2.2-rc.3/screenshots/`：中文深色、英文浅色、拖动/焦点、目标重启、上一版和最低版最终包。本轮未改变插件 UI；截图包含本机 Chrome 工具栏，因此仅保留本地证据，不加入公开仓库及 npm 包。既有公开界面截图保留。
 
+## 正式发布前的说明更新
+
+中英文 README 将“候选”改为实际测试范围。重新打包结果为 44925 字节、9 个文件，integrity 为 `sha512-vzLymFHWTjjWzbpiIeOOTps4dZJAjG2WaqmNgahVGGbnfyMVfl38HfDdLqSAO+AVFrvjkWmGaDTlMxXdWWbq+w==`。逐文件比较确认仅两份 README 改变。该产物在目标、上一 rc 及最低版的隔离 profile 中重新安装，三版的 9 个安装文件均与 tarball 一致，组合配置均包含 `ui-pomodoro`。发布演练再次通过 72 项测试，安全扫描为 0 FAIL / 0 WARN。正式 npm 包的加载、设置和计时冒烟在发布后单独进行。
+
 ## 限制与发布状态
 
 未验证系统通知授权/操作系统送达、声音实际可听性、跨机器 TLS/远程设置、安装器回滚、完整浏览器日志，以及正式 npm 发布后的独立安装。只声明表中实际验证的三版及范围。
 
-当前为本地 v0.5.6 候选，正式发布仍为 v0.5.5。GitHub CLI 认证不可用；本轮尝试写入实际验证文档时，连接器再次返回 `403 Resource not accessible by integration`，没有形成远端修改。没有新发布 PR、必需 CI、main 服务端合并、Release 或 npm Trusted Publishing 结果。恢复认证后从 `.validation/rc-maintenance/state.json` 复核远端事实并续跑，完成正式 npm 包复验后才能标记 rc.3 已发布适配。
+本文记录发布前实测。正式发布结果见 [GitHub Release](https://github.com/causebefore/dsh-pomodoro/releases/tag/v0.5.6) 和 [npm 版本页](https://www.npmjs.com/package/dsh-pomodoro/v/0.5.6)。
 
 历史候选记录在 `1cbb218`（0.2.2-rc.2）、`d907c08`（0.2.2-rc.1）、`a232d9f`（0.2.1-rc.5）、`ee95842`（0.2.1-rc.4）、`33e8906`（0.2.1-rc.3）；已发布基线见 [v0.5.5 验证记录](validation-v0.5.5.zh.md)。
