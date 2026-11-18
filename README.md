@@ -86,7 +86,7 @@ Supports light and dark themes, a compact mini mode, and configuration through D
 
 | Component | Requirement |
 |---|---|
-| DeepSeek Harness | v0.5.6 tested with `0.2.2-rc.3`, `0.2.2-rc.2`, and `0.1.0-rc.7`; see the [validation record](docs/validation-v0.5.6.zh.md) for test coverage |
+| DeepSeek Harness | v0.5.7 tested with `0.2.2-rc.4`, `0.2.2-rc.3`, and `0.1.0-rc.7`; see the [validation record](docs/validation-v0.5.7.zh.md) for test coverage |
 | Node.js | Plugin: `^22.19.0` or `>=24.0.0`; DSH 0.2.2 rc hosts require `>=24.9.0` |
 | DSH profile | `web`; headless profiles do not provide the UI |
 | pnpm | Available from the command line |
